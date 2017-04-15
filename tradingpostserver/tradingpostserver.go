@@ -3,6 +3,8 @@ package tradingpostserver
 import (
 	"fmt"
 	"net/http"
+
+	mgo "gopkg.in/mgo.v2"
 )
 
 // TradingPostServer defines the interface for a
@@ -15,15 +17,25 @@ type TradingPostServer interface {
 }
 
 // New instantiates a new TradingPostServer instance
-func New(port int) TradingPostServer {
-	return &httpServer{port: port}
+func New(port int, mongoDBURL string) TradingPostServer {
+	return &httpServer{
+		port:       port,
+		mongoDBURL: mongoDBURL,
+	}
 }
 
 type httpServer struct {
-	port int
+	port       int
+	mongoDBURL string
 }
 
 func (server *httpServer) Run() error {
+	mongoDB, err := mgo.Dial(server.mongoDBURL)
+	if err != nil {
+		return err
+	}
+	defer mongoDB.Close()
+
 	addr := fmt.Sprintf(":%v", server.port)
-	return http.ListenAndServe(addr, newRouter())
+	return http.ListenAndServe(addr, newRouter(mongoDB))
 }

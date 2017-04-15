@@ -51,6 +51,31 @@
 			"notests": true
 		},
 		{
+			"importpath": "golang.org/x/net/context",
+			"repository": "https://go.googlesource.com/net",
+			"vcs": "git",
+			"revision": "5602c733f70afc6dcec6766be0d5034d4c4f14de",
+			"branch": "master",
+			"path": "/context",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/mgo.v2",
+			"repository": "https://gopkg.in/mgo.v2",
+			"vcs": "git",
+			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",
+			"branch": "v2",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/tomb.v2",
+			"repository": "https://gopkg.in/tomb.v2",
+			"vcs": "git",
+			"revision": "d5d1b5820637886def9eef33e03a27a9f166942c",
+			"branch": "v2",
+			"notests": true
+		},
+		{
 			"importpath": "gopkg.in/urfave/cli.v1",
 			"repository": "https://gopkg.in/urfave/cli.v1",
 			"vcs": "git",

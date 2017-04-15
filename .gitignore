@@ -27,3 +27,4 @@ entrypoint/trading-post
 go-trading-post
 entrypoint/go-trading-post
 dist
+private
