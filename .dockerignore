@@ -1,0 +1,8 @@
+.git
+trading-post
+entrypoint/trading-post
+go-trading-post
+entrypoint/go-trading-post
+build.sh
+cross-compile.sh
+README.md

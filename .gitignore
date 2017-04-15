@@ -22,3 +22,8 @@ _testmain.go
 *.exe
 *.test
 *.prof
+trading-post
+entrypoint/trading-post
+go-trading-post
+entrypoint/go-trading-post
+dist
