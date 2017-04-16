@@ -9,7 +9,14 @@ import (
 // BuyOrder represents a purchase order for a
 // specific stock
 type BuyOrder interface {
+	// JSON serializes the buy order
 	JSON() ([]byte, error)
+
+	// SetPrice stores the price of the stock
+	SetPrice(price float32)
+
+	// GetTicker returns the stock ticker code
+	GetTicker() string
 }
 
 // ParseBuyOrder instantiates a new BuyOrder instance from JSON
@@ -30,9 +37,18 @@ func ParseBuyOrder(data io.ReadCloser) (BuyOrder, error) {
 }
 
 type buyOrder struct {
-	Ticker string `json:"ticker"`
+	Ticker string  `json:"ticker"`
+	Price  float32 `json:"price"`
 }
 
 func (order *buyOrder) JSON() ([]byte, error) {
-	return make([]byte, 0), nil
+	return json.Marshal(order)
+}
+
+func (order *buyOrder) SetPrice(price float32) {
+	order.Price = price
+}
+
+func (order *buyOrder) GetTicker() string {
+	return order.Ticker
 }
