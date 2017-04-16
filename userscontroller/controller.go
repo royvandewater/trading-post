@@ -24,7 +24,7 @@ type controller struct {
 }
 
 func (c *controller) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	user, err := usersservice.ParseUse(r.Body)
+	user, err := usersservice.ParseUser(r.Body)
 	if err != nil {
 		w.WriteHeader(422)
 		w.Write([]byte(err.Error()))
