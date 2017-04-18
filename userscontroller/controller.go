@@ -11,38 +11,33 @@ import (
 // UsersController handles HTTP requests
 // regarding users
 type UsersController interface {
-	Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
+	Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 // New constructs a new UsersController instance
 func New(usersService usersservice.UsersService) UsersController {
-	return &controller{usersService: usersService}
+	return &_Controller{usersService: usersService}
 }
 
-type controller struct {
+type _Controller struct {
 	usersService usersservice.UsersService
 }
 
-func (c *controller) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	user, err := usersservice.ParseUser(r.Body)
-	if err != nil {
-		w.WriteHeader(422)
-		w.Write([]byte(err.Error()))
-	}
+func (c *_Controller) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	code := r.URL.Query().Get("code")
 
-	storedUser, code, err := c.usersService.CreateUser(user)
+	user, statusCode, err := c.usersService.Login(code)
 	if err != nil {
-		w.WriteHeader(code)
-		w.Write([]byte(err.Error()))
+		http.Error(w, err.Error(), statusCode)
 		return
 	}
 
-	storedUserJSON, err := storedUser.JSON()
+	userJSON, err := user.JSON()
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(fmt.Sprintf("Failed to generate JSON response: %v", err.Error())))
+		http.Error(w, fmt.Sprintf("Failed to generate JSON response: %v", err.Error()), http.StatusInternalServerError)
+		return
 	}
 
-	w.WriteHeader(code)
-	w.Write(storedUserJSON)
+	w.WriteHeader(statusCode)
+	w.Write(userJSON)
 }

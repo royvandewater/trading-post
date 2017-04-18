@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/royvandewater/trading-post/auth0creds"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -17,16 +19,18 @@ type TradingPostServer interface {
 }
 
 // New instantiates a new TradingPostServer instance
-func New(port int, mongoDBURL string) TradingPostServer {
+func New(auth0Creds auth0creds.Auth0Creds, mongoDBURL string, port int) TradingPostServer {
 	return &httpServer{
+		auth0Creds: auth0Creds,
 		port:       port,
 		mongoDBURL: mongoDBURL,
 	}
 }
 
 type httpServer struct {
-	port       int
+	auth0Creds auth0creds.Auth0Creds
 	mongoDBURL string
+	port       int
 }
 
 func (server *httpServer) Run() error {
@@ -37,5 +41,6 @@ func (server *httpServer) Run() error {
 	defer mongoDB.Close()
 
 	addr := fmt.Sprintf(":%v", server.port)
-	return http.ListenAndServe(addr, newRouter(mongoDB))
+	router := newRouter(server.auth0Creds, mongoDB)
+	return http.ListenAndServe(addr, router)
 }

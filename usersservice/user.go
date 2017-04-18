@@ -2,37 +2,34 @@ package usersservice
 
 import (
 	"encoding/json"
-	"io"
-	"io/ioutil"
 )
 
 // User represents a user of the system.
 // Owner of purchase orders and sell orders.
+// Only the profile portion of a user is ever stored
+// server side
 type User interface {
+	// JSON serializes the user record
 	JSON() ([]byte, error)
 }
 
-// ParseUser creates a User instance from a ReadCloser
-// (like an HTTP request body)
-func ParseUser(data io.ReadCloser) (User, error) {
-	dataBytes, err := ioutil.ReadAll(data)
-	if err != nil {
-		return nil, err
-	}
-
-	user := &user{}
-	err = json.Unmarshal(dataBytes, user)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
+// Profile represents the information about a user
+// that the application stores.
+type Profile interface {
+	// JSON serializes the Profile record
+	JSON() ([]byte, error)
 }
 
-type user struct {
-	Name string `json:"name"`
+type _User struct {
+	IDToken     string   `json:"id_token"`
+	AccessToken string   `json:"access_token"`
+	Profile     _Profile `json:"profile"`
 }
 
-func (u *user) JSON() ([]byte, error) {
+func (u *_User) JSON() ([]byte, error) {
 	return json.Marshal(u)
+}
+
+type _Profile struct {
+	UserID string `bson:"user_id" json:"user_id"`
 }
