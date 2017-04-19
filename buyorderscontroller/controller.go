@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/royvandewater/trading-post/ordersservice"
 )
 
 // BuyOrdersController handles HTTP requests
 // regarding buy orders
 type BuyOrdersController interface {
-	Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
+	Create(w http.ResponseWriter, r *http.Request)
 }
 
 // New constructs a new BuyOrdersController instance
@@ -23,7 +22,7 @@ type controller struct {
 	ordersService ordersservice.OrdersService
 }
 
-func (c *controller) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
 	buyOrder, err := ordersservice.ParseBuyOrder(r.Body)
 	if err != nil {
 		w.WriteHeader(422)

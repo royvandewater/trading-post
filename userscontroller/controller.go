@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/royvandewater/trading-post/usersservice"
 )
 
 // UsersController handles HTTP requests
 // regarding users
 type UsersController interface {
-	Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
+	Login(w http.ResponseWriter, r *http.Request)
 }
 
 // New constructs a new UsersController instance
@@ -23,7 +22,7 @@ type _Controller struct {
 	usersService usersservice.UsersService
 }
 
-func (c *_Controller) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (c *_Controller) Login(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 
 	user, statusCode, err := c.usersService.Login(code)

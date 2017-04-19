@@ -5,7 +5,7 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 	"github.com/royvandewater/trading-post/auth0creds"
 	"github.com/royvandewater/trading-post/buyorderscontroller"
 	"github.com/royvandewater/trading-post/ordersservice"
@@ -22,12 +22,10 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 	sellOrdersController := sellorderscontroller.New()
 	usersController := userscontroller.New(usersService)
 
-	router := httprouter.New()
-	router.POST("/buy-orders", buyOrdersController.Create)
-	router.POST("/sell-orders", sellOrdersController.Create)
-	router.GET("/callback", usersController.Login)
-	router.GET("/", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		http.ServeFile(w, r, "html/index.html")
-	})
+	router := mux.NewRouter()
+	router.Methods("POST").Path("/buy-orders").HandlerFunc(buyOrdersController.Create)
+	router.Methods("POST").Path("/sell-orders").HandlerFunc(sellOrdersController.Create)
+	router.Methods("GET").Path("/callback").HandlerFunc(usersController.Login)
+	router.Methods("GET").Handler(http.FileServer(http.Dir("html/")))
 	return router
 }
