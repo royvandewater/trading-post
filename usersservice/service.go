@@ -73,7 +73,22 @@ func (s *_Service) Login(code string) (User, int, error) {
 		return nil, http.StatusInternalServerError, err
 	}
 
-	s.profiles.Upsert(bson.M{"user_id": profile.UserID}, &profile)
+	userID := profile.UserID
+
+	_, err = s.profiles.Upsert(bson.M{"user_id": userID}, &profile)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	err = s.profiles.Update(bson.M{"user_id": userID, "riches": bson.M{"$exists": false}}, bson.M{"$set": bson.M{"riches": 0}})
+	if err != nil && err != mgo.ErrNotFound {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	err = s.profiles.Find(bson.M{"user_id": userID}).One(&profile)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
 
 	user := _User{
 		IDToken:     token.Extra("id_token").(string),
