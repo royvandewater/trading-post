@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/royvandewater/trading-post/auth0creds"
 	"golang.org/x/oauth2"
 	mgo "gopkg.in/mgo.v2"
@@ -14,23 +15,30 @@ import (
 
 // UsersService manages CRUD for buy & sell users
 type UsersService interface {
+	// Login exchanges the code for a user profile
+	// and then upserts the user profile into persistent
+	// storage
 	Login(code string) (User, int, error)
+
+	// UserIDForAccessToken verifies the RS256 signature
+	// of a JWT access token
+	UserIDForAccessToken(accessToken string) (string, error)
 }
 
 // New constructs a new UsersService that will
 // persist data using the provided mongo session
 func New(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) UsersService {
 	profiles := mongoDB.DB("tradingPost").C("profiles")
-	return &service{auth0Creds: auth0Creds, profiles: profiles}
+	return &_Service{auth0Creds: auth0Creds, profiles: profiles}
 }
 
-type service struct {
+type _Service struct {
 	auth0Creds auth0creds.Auth0Creds
 	profiles   *mgo.Collection
 }
 
 // Login finds or creates a user in the database
-func (s *service) Login(code string) (User, int, error) {
+func (s *_Service) Login(code string) (User, int, error) {
 	conf := &oauth2.Config{
 		ClientID:     s.auth0Creds.ClientID,
 		ClientSecret: s.auth0Creds.ClientSecret,
@@ -73,4 +81,29 @@ func (s *service) Login(code string) (User, int, error) {
 		Profile:     profile,
 	}
 	return &user, 0, nil
+}
+
+func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
+	claims := &_ProfileClaims{}
+
+	_, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(s.auth0Creds.ClientSecret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return claims.UserID, nil
+	// return "", nil
+}
+
+type _ProfileClaims struct {
+	jwt.StandardClaims
+
+	UserID string `json:"sub"`
 }

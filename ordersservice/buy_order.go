@@ -19,9 +19,9 @@ type BuyOrder interface {
 	GetTicker() string
 }
 
-// ParseBuyOrder instantiates a new BuyOrder instance from JSON
+// ParseBuyOrderForUserID instantiates a new BuyOrder instance from JSON
 // data
-func ParseBuyOrder(data io.ReadCloser) (BuyOrder, error) {
+func ParseBuyOrderForUserID(userID string, data io.ReadCloser) (BuyOrder, error) {
 	dataBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return nil, err
@@ -33,12 +33,15 @@ func ParseBuyOrder(data io.ReadCloser) (BuyOrder, error) {
 		return nil, err
 	}
 
+	buyOrder.UserID = userID
+
 	return buyOrder, nil
 }
 
 type buyOrder struct {
-	Ticker string  `json:"ticker"`
 	Price  float32 `json:"price"`
+	Ticker string  `json:"ticker"`
+	UserID string  `json:"user_id"`
 }
 
 func (order *buyOrder) JSON() ([]byte, error) {

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/royvandewater/trading-post/ordersservice"
+	"github.com/royvandewater/trading-post/usercontext"
 )
 
 // BuyOrdersController handles HTTP requests
@@ -22,26 +23,31 @@ type controller struct {
 	ordersService ordersservice.OrdersService
 }
 
-func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
-	buyOrder, err := ordersservice.ParseBuyOrder(r.Body)
+func (c *controller) Create(rw http.ResponseWriter, r *http.Request) {
+	user, ok := usercontext.FromContext(r.Context())
+	if !ok {
+		http.Error(rw, "Somehow got to an authenticated area without authentication", 500)
+		return
+	}
+
+	buyOrder, err := ordersservice.ParseBuyOrderForUserID(user.ID, r.Body)
 	if err != nil {
-		w.WriteHeader(422)
-		w.Write([]byte(err.Error()))
+		http.Error(rw, err.Error(), 422)
+		return
 	}
 
 	storedBuyOrder, code, err := c.ordersService.CreateBuyOrder(buyOrder)
 	if err != nil {
-		w.WriteHeader(code)
-		w.Write([]byte(err.Error()))
+		http.Error(rw, err.Error(), code)
 		return
 	}
 
 	storedBuyOrderJSON, err := storedBuyOrder.JSON()
 	if err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(fmt.Sprintf("Failed to generate JSON response: %v", err.Error())))
+		http.Error(rw, fmt.Sprintf("Failed to generate JSON response: %v", err.Error()), 500)
+		return
 	}
 
-	w.WriteHeader(code)
-	w.Write(storedBuyOrderJSON)
+	rw.WriteHeader(code)
+	rw.Write(storedBuyOrderJSON)
 }

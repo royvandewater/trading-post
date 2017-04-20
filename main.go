@@ -58,6 +58,7 @@ func main() {
 
 func run(context *cli.Context) {
 	auth0CallbackURL, auth0ClientID, auth0ClientSecret, auth0Domain, mongoDBURL, port := getOpts(context)
+
 	auth0Creds := auth0creds.Auth0Creds{
 		CallbackURL:  auth0CallbackURL,
 		ClientID:     auth0ClientID,
@@ -102,6 +103,13 @@ func getOpts(context *cli.Context) (string, string, string, string, string, int)
 		}
 		os.Exit(1)
 	}
+
+	// auth0SigningSecretKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(auth0SigningSecret))
+	// if err != nil {
+	// 	cli.ShowAppHelp(context)
+	// 	color.Red("--auth0-signing-secret key must be in pem format")
+	// 	os.Exit(1)
+	// }
 
 	return auth0CallbackURL, auth0ClientID, auth0ClientSecret, auth0Domain, mongoDBURL, port
 }

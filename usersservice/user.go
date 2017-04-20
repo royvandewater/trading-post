@@ -32,4 +32,5 @@ func (u *_User) JSON() ([]byte, error) {
 
 type _Profile struct {
 	UserID string `bson:"user_id" json:"user_id"`
+	Name   string `bson:"name" json:"name"`
 }

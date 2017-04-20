@@ -12,6 +12,7 @@ import (
 	"github.com/royvandewater/trading-post/sellorderscontroller"
 	"github.com/royvandewater/trading-post/userscontroller"
 	"github.com/royvandewater/trading-post/usersservice"
+	"github.com/urfave/negroni"
 )
 
 func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Handler {
@@ -23,9 +24,16 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 	usersController := userscontroller.New(usersService)
 
 	router := mux.NewRouter()
-	router.Methods("POST").Path("/buy-orders").HandlerFunc(buyOrdersController.Create)
-	router.Methods("POST").Path("/sell-orders").HandlerFunc(sellOrdersController.Create)
 	router.Methods("GET").Path("/callback").HandlerFunc(usersController.Login)
 	router.Methods("GET").Handler(http.FileServer(http.Dir("html/")))
+
+	profileRouter := mux.NewRouter().PathPrefix("/profile").Subrouter()
+	profileRouter.Methods("POST").Path("/buy-orders").HandlerFunc(buyOrdersController.Create)
+	profileRouter.Methods("POST").Path("/sell-orders").HandlerFunc(sellOrdersController.Create)
+	router.PathPrefix("/profile").Handler(negroni.New(
+		negroni.HandlerFunc(usersController.Authenticate),
+		negroni.Wrap(profileRouter),
+	))
+
 	return router
 }
