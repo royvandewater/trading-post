@@ -16,8 +16,11 @@ type User interface {
 // Profile represents the information about a user
 // that the application stores.
 type Profile interface {
-	// JSON serializes the Profile record
-	JSON() ([]byte, error)
+	// GetName returns the profile's name
+	GetName() string
+
+	// GetRiches returns the profile's riches
+	GetRiches() float32
 }
 
 type _User struct {
@@ -33,5 +36,13 @@ func (u *_User) JSON() ([]byte, error) {
 type _Profile struct {
 	UserID string  `bson:"user_id" json:"user_id"`
 	Name   string  `bson:"name" json:"name"`
-	Riches float32 `bson:"riches" json:"riches"`
+	Riches float32 `bson:"riches,omitempty" json:"riches,omitempty"`
+}
+
+func (p *_Profile) GetName() string {
+	return p.Name
+}
+
+func (p *_Profile) GetRiches() float32 {
+	return p.Riches
 }

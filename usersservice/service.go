@@ -15,6 +15,9 @@ import (
 
 // UsersService manages CRUD for buy & sell users
 type UsersService interface {
+	// GetProfile retrieves a profile for a userID
+	GetProfile(userID string) (Profile, error)
+
 	// Login exchanges the code for a user profile
 	// and then upserts the user profile into persistent
 	// storage
@@ -39,6 +42,17 @@ func New(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) UsersService {
 type _Service struct {
 	auth0Creds auth0creds.Auth0Creds
 	profiles   *mgo.Collection
+}
+
+func (s *_Service) GetProfile(userID string) (Profile, error) {
+	profile := &_Profile{}
+
+	err := s.profiles.Find(bson.M{"user_id": userID}).One(profile)
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, nil
 }
 
 // Login finds or creates a user in the database

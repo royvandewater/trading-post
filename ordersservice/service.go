@@ -9,6 +9,7 @@ import (
 	"github.com/royvandewater/trading-post/usersservice"
 
 	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // OrdersService manages CRUD for buy & sell orders
@@ -16,7 +17,10 @@ type OrdersService interface {
 	// Create will persist a new order at the market rate
 	// for the given ticker. The market rate will be subtracted
 	// from the given user's riches.
-	Create(userID, ticker string) (Order, int, error)
+	Create(userID, ticker string) (Order, error)
+
+	// List returns all orders for a user
+	List(userID string) ([]Order, error)
 }
 
 // New constructs a new OrdersService that will
@@ -31,24 +35,40 @@ type _Service struct {
 	usersService usersservice.UsersService
 }
 
-func (s *_Service) Create(userID, ticker string) (Order, int, error) {
+func (s *_Service) Create(userID, ticker string) (Order, error) {
 	purchasePrice, err := stockPrice(ticker)
 	if err != nil {
-		return nil, 502, err
+		return nil, err
 	}
 
 	order := NewOrder(userID, ticker, purchasePrice)
 	err = s.orders.Insert(order)
 	if err != nil {
-		return nil, 500, err
+		return nil, err
 	}
 
 	err = s.usersService.SubstractRichesByUserID(order.GetUserID(), purchasePrice)
 	if err != nil {
-		return nil, 500, err
+		return nil, err
 	}
 
-	return order, 201, nil
+	return order, nil
+}
+
+func (s *_Service) List(userID string) ([]Order, error) {
+	var _orders []*_Order
+
+	err := s.orders.Find(bson.M{"user_id": userID}).All(&_orders)
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]Order, len(_orders))
+	for i, _order := range _orders {
+		orders[i] = _order
+	}
+
+	return orders, nil
 }
 
 func stockPrice(ticker string) (float32, error) {

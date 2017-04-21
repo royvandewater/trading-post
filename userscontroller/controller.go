@@ -12,7 +12,15 @@ import (
 // UsersController handles HTTP requests
 // regarding users
 type UsersController interface {
+	// Authenticate is middleware that will gate access to any handlers
+	// down the chain. After Authenticate has been called, and it has
+	// successfuly next, you can access the user object using:
+	// `user := usercontext.FromContext(r.Context())`
 	Authenticate(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc)
+
+	// Login returns a user object, along with a nested profile. The
+	// id_token should be used as the a "Authorization Bearer" token
+	// for example: `curl -H 'Authorization: Bearer <id_token>' http://...`
 	Login(rw http.ResponseWriter, r *http.Request)
 }
 
