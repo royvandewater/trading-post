@@ -21,13 +21,13 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 	ordersController := orderscontroller.New(ordersService)
 	usersController := userscontroller.New(usersService)
 
+	profileRouter := mux.NewRouter().PathPrefix("/profile").Subrouter()
+	profileRouter.Methods("POST").Path("/orders").HandlerFunc(ordersController.Create)
+	profileRouter.Methods("GET").Path("/orders").HandlerFunc(ordersController.List)
+
 	router := mux.NewRouter()
 	router.Methods("GET").Path("/callback").HandlerFunc(usersController.Login)
 	router.Methods("GET").Handler(http.FileServer(http.Dir("html/")))
-
-	profileRouter := mux.NewRouter().PathPrefix("/profile").Subrouter()
-	profileRouter.Methods("POST").Path("/orders").HandlerFunc(ordersController.Create)
-
 	router.PathPrefix("/profile").Handler(negroni.New(
 		negroni.HandlerFunc(usersController.Authenticate),
 		negroni.Wrap(profileRouter),

@@ -13,10 +13,10 @@ import (
 
 // OrdersService manages CRUD for buy & sell orders
 type OrdersService interface {
-	// CreateOrder create's a new order at the market rate
+	// Create will persist a new order at the market rate
 	// for the given ticker. The market rate will be subtracted
 	// from the given user's riches.
-	CreateOrder(userID, ticker string) (Order, int, error)
+	Create(userID, ticker string) (Order, int, error)
 }
 
 // New constructs a new OrdersService that will
@@ -31,7 +31,7 @@ type _Service struct {
 	usersService usersservice.UsersService
 }
 
-func (s *_Service) CreateOrder(userID, ticker string) (Order, int, error) {
+func (s *_Service) Create(userID, ticker string) (Order, int, error) {
 	purchasePrice, err := stockPrice(ticker)
 	if err != nil {
 		return nil, 502, err

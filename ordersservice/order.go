@@ -1,16 +1,10 @@
 package ordersservice
 
-import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
-)
-
 // Order represents a purchase order for a
 // specific stock
 type Order interface {
-	// JSON serializes the buy order
-	JSON() ([]byte, error)
+	// GetPurchasePrice returns the price the order was purchased at
+	GetPurchasePrice() float32
 
 	// GetTicker returns the stock ticker code
 	GetTicker() string
@@ -28,32 +22,14 @@ func NewOrder(userID, ticker string, purchasePrice float32) Order {
 	}
 }
 
-// ParseOrderForUserID instantiates a new Order instance from JSON data
-func ParseOrderForUserID(userID string, data io.ReadCloser) (Order, error) {
-	dataBytes, err := ioutil.ReadAll(data)
-	if err != nil {
-		return nil, err
-	}
-
-	order := &_Order{}
-	err = json.Unmarshal(dataBytes, order)
-	if err != nil {
-		return nil, err
-	}
-
-	order.UserID = userID
-
-	return order, nil
-}
-
 type _Order struct {
-	PurchasePrice float32 `json:"purchase_price"`
-	Ticker        string  `json:"ticker"`
-	UserID        string  `json:"user_id"`
+	PurchasePrice float32 `bson:"purchase_price"`
+	Ticker        string  `bson:"ticker"`
+	UserID        string  `bson:"user_id"`
 }
 
-func (order *_Order) JSON() ([]byte, error) {
-	return json.MarshalIndent(order, "", "  ")
+func (order *_Order) GetPurchasePrice() float32 {
+	return order.PurchasePrice
 }
 
 func (order *_Order) GetTicker() string {
