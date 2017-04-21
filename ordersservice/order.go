@@ -1,8 +1,14 @@
 package ordersservice
 
+import uuid "github.com/satori/go.uuid"
+
 // Order represents a purchase order for a
 // specific stock
 type Order interface {
+	// GetID returns the unique identifier used to identify this
+	// record in persistent storage
+	GetID() string
+
 	// GetPurchasePrice returns the price the order was purchased at
 	GetPurchasePrice() float32
 
@@ -13,12 +19,14 @@ type Order interface {
 	GetUserID() string
 }
 
-// NewOrder constructs a new order instance given a user, ticker, and price
+// NewOrder constructs a new order instance given a user, ticker, and price.
+// it will also gain an ID, representing just this order instance
 func NewOrder(userID, ticker string, purchasePrice float32) Order {
 	return &_Order{
-		UserID:        userID,
-		Ticker:        ticker,
+		ID:            uuid.NewV4().String(),
 		PurchasePrice: purchasePrice,
+		Ticker:        ticker,
+		UserID:        userID,
 	}
 }
 
@@ -26,6 +34,11 @@ type _Order struct {
 	PurchasePrice float32 `bson:"purchase_price"`
 	Ticker        string  `bson:"ticker"`
 	UserID        string  `bson:"user_id"`
+	ID            string  `bson:"id"`
+}
+
+func (order *_Order) GetID() string {
+	return order.ID
 }
 
 func (order *_Order) GetPurchasePrice() float32 {
