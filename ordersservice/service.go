@@ -6,38 +6,49 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/royvandewater/trading-post/usersservice"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
 // OrdersService manages CRUD for buy & sell orders
 type OrdersService interface {
-	CreateBuyOrder(buyOrder BuyOrder) (BuyOrder, int, error)
+	// CreateOrder create's a new order at the market rate
+	// for the given ticker. The market rate will be subtracted
+	// from the given user's riches.
+	CreateOrder(userID, ticker string) (Order, int, error)
 }
 
 // New constructs a new OrdersService that will
 // persist data using the provided mongo session
-func New(mongoDB *mgo.Session) OrdersService {
-	buyOrders := mongoDB.DB("tradingPost").C("buyOrders")
-	return &service{buyOrders: buyOrders}
+func New(mongoDB *mgo.Session, usersService usersservice.UsersService) OrdersService {
+	orders := mongoDB.DB("tradingPost").C("orders")
+	return &_Service{orders: orders, usersService: usersService}
 }
 
-type service struct {
-	buyOrders *mgo.Collection
+type _Service struct {
+	orders       *mgo.Collection
+	usersService usersservice.UsersService
 }
 
-func (s *service) CreateBuyOrder(buyOrder BuyOrder) (BuyOrder, int, error) {
-	price, err := stockPrice(buyOrder.GetTicker())
+func (s *_Service) CreateOrder(userID, ticker string) (Order, int, error) {
+	purchasePrice, err := stockPrice(ticker)
 	if err != nil {
 		return nil, 502, err
 	}
 
-	buyOrder.SetPrice(price)
-	err = s.buyOrders.Insert(buyOrder)
+	order := NewOrder(userID, ticker, purchasePrice)
+	err = s.orders.Insert(order)
 	if err != nil {
 		return nil, 500, err
 	}
 
-	return buyOrder, 201, nil
+	err = s.usersService.SubstractRichesByUserID(order.GetUserID(), purchasePrice)
+	if err != nil {
+		return nil, 500, err
+	}
+
+	return order, 201, nil
 }
 
 func stockPrice(ticker string) (float32, error) {

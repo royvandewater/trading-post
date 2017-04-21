@@ -20,6 +20,10 @@ type UsersService interface {
 	// storage
 	Login(code string) (User, int, error)
 
+	// SubstractRichesByUserID removes riches from the user. Will
+	// return an error if the user cannot be found
+	SubstractRichesByUserID(userID string, amount float32) error
+
 	// UserIDForAccessToken verifies the RS256 signature
 	// of a JWT access token
 	UserIDForAccessToken(accessToken string) (string, error)
@@ -96,6 +100,13 @@ func (s *_Service) Login(code string) (User, int, error) {
 		Profile:     profile,
 	}
 	return &user, 0, nil
+}
+
+func (s *_Service) SubstractRichesByUserID(userID string, amount float32) error {
+	query := bson.M{"user_id": userID}
+	update := bson.M{"$inc": bson.M{"riches": -1 * amount}}
+
+	return s.profiles.Update(query, update)
 }
 
 func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
