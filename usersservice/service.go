@@ -15,6 +15,10 @@ import (
 
 // UsersService manages CRUD for buy & sell users
 type UsersService interface {
+	// AddRichesByUserID adds to the user's riches. Will
+	// return an error if the user cannot be found
+	AddRichesByUserID(userID string, amount float32) error
+
 	// GetProfile retrieves a profile for a userID
 	GetProfile(userID string) (Profile, error)
 
@@ -35,13 +39,20 @@ type UsersService interface {
 // New constructs a new UsersService that will
 // persist data using the provided mongo session
 func New(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) UsersService {
-	profiles := mongoDB.DB("tradingPost").C("profiles")
+	profiles := mongoDB.DB("trading_post").C("profiles")
 	return &_Service{auth0Creds: auth0Creds, profiles: profiles}
 }
 
 type _Service struct {
 	auth0Creds auth0creds.Auth0Creds
 	profiles   *mgo.Collection
+}
+
+func (s *_Service) AddRichesByUserID(userID string, amount float32) error {
+	query := bson.M{"user_id": userID}
+	update := bson.M{"$inc": bson.M{"riches": amount}}
+
+	return s.profiles.Update(query, update)
 }
 
 func (s *_Service) GetProfile(userID string) (Profile, error) {

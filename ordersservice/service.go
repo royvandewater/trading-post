@@ -14,35 +14,50 @@ import (
 
 // OrdersService manages CRUD for buy & sell orders
 type OrdersService interface {
-	// Create will persist a new order at the market rate
+	// CreateBuyOrder will persist a new order at the market rate
 	// for the given ticker. The market rate will be subtracted
 	// from the given user's riches.
-	Create(userID, ticker string) (Order, error)
+	CreateBuyOrder(userID, ticker string) (BuyOrder, error)
 
-	// List returns all orders for a user
-	List(userID string) ([]Order, error)
+	// GetBuyOrder will retrieve a buy order for a given user & id
+	GetBuyOrder(userID, id string) (BuyOrder, error)
+
+	// ListBuyOrders returns all orders for a user
+	ListBuyOrders(userID string) ([]BuyOrder, error)
+
+	// CreateSellOrder will persist a new sell order at the market rate
+	// for the given ticker. The market rate will be added
+	// to the given user's riches. It will return an error if
+	// the user doesn't own enough of the stock
+	CreateSellOrder(userID, ticker string) (SellOrder, error)
 }
 
-// New constructs a new OrdersService that will
+// New constructs a new BuyOrdersService that will
 // persist data using the provided mongo session
 func New(mongoDB *mgo.Session, usersService usersservice.UsersService) OrdersService {
-	orders := mongoDB.DB("tradingPost").C("orders")
-	return &_Service{orders: orders, usersService: usersService}
+	buyOrders := mongoDB.DB("trading_post").C("buy_orders")
+	sellOrders := mongoDB.DB("trading_post").C("sell_orders")
+	return &_Service{
+		buyOrders:    buyOrders,
+		sellOrders:   sellOrders,
+		usersService: usersService,
+	}
 }
 
 type _Service struct {
-	orders       *mgo.Collection
+	buyOrders    *mgo.Collection
+	sellOrders   *mgo.Collection
 	usersService usersservice.UsersService
 }
 
-func (s *_Service) Create(userID, ticker string) (Order, error) {
+func (s *_Service) CreateBuyOrder(userID, ticker string) (BuyOrder, error) {
 	purchasePrice, err := stockPrice(ticker)
 	if err != nil {
 		return nil, err
 	}
 
-	order := NewOrder(userID, ticker, purchasePrice)
-	err = s.orders.Insert(order)
+	order := NewBuyOrder(userID, ticker, purchasePrice)
+	err = s.buyOrders.Insert(order)
 	if err != nil {
 		return nil, err
 	}
@@ -55,15 +70,46 @@ func (s *_Service) Create(userID, ticker string) (Order, error) {
 	return order, nil
 }
 
-func (s *_Service) List(userID string) ([]Order, error) {
-	var _orders []*_Order
-
-	err := s.orders.Find(bson.M{"user_id": userID}).All(&_orders)
+func (s *_Service) CreateSellOrder(userID, ticker string) (SellOrder, error) {
+	price, err := stockPrice(ticker)
 	if err != nil {
 		return nil, err
 	}
 
-	orders := make([]Order, len(_orders))
+	order := NewSellOrder(userID, ticker, price)
+	err = s.sellOrders.Insert(order)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.usersService.AddRichesByUserID(order.GetUserID(), price)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
+func (s *_Service) GetBuyOrder(userID, id string) (BuyOrder, error) {
+	_order := _BuyOrder{}
+
+	err := s.buyOrders.Find(bson.M{"user_id": userID, "id": id}).One(&_order)
+	if err != nil {
+		return nil, err
+	}
+
+	return &_order, nil
+}
+
+func (s *_Service) ListBuyOrders(userID string) ([]BuyOrder, error) {
+	var _orders []*_BuyOrder
+
+	err := s.buyOrders.Find(bson.M{"user_id": userID}).All(&_orders)
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]BuyOrder, len(_orders))
 	for i, _order := range _orders {
 		orders[i] = _order
 	}
