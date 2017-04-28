@@ -16,7 +16,8 @@ import (
 type OrdersService interface {
 	// CreateBuyOrder will persist a new order at the market rate
 	// for the given ticker. The market rate will be subtracted
-	// from the given user's riches.
+	// from the given profile's riches and the user's stock
+	// quantity for this ticker will go up.
 	CreateBuyOrder(userID, ticker string) (BuyOrder, error)
 
 	// GetBuyOrder will retrieve a buy order for a given user & id
@@ -27,7 +28,8 @@ type OrdersService interface {
 
 	// CreateSellOrder will persist a new sell order at the market rate
 	// for the given ticker. The market rate will be added
-	// to the given user's riches. It will return an error if
+	// to the given user's riches and the user's stock quantity
+	// for this ticker will go down. It will return an error if
 	// the user doesn't own enough of the stock
 	CreateSellOrder(userID, ticker string) (SellOrder, error)
 }
@@ -62,7 +64,7 @@ func (s *_Service) CreateBuyOrder(userID, ticker string) (BuyOrder, error) {
 		return nil, err
 	}
 
-	err = s.usersService.SubstractRichesByUserID(order.GetUserID(), purchasePrice)
+	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, purchasePrice)
 	if err != nil {
 		return nil, err
 	}

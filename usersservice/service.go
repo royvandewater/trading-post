@@ -27,9 +27,10 @@ type UsersService interface {
 	// storage
 	Login(code string) (User, int, error)
 
-	// SubstractRichesByUserID removes riches from the user. Will
+	// UpdateForBuyOrderByUserID removes riches from the user and adds
+	// to the stock quantity for the given ticker. Will
 	// return an error if the user cannot be found
-	SubstractRichesByUserID(userID string, amount float32) error
+	UpdateForBuyOrderByUserID(userID, ticker string, amount float32) error
 
 	// UserIDForAccessToken verifies the RS256 signature
 	// of a JWT access token
@@ -129,9 +130,14 @@ func (s *_Service) Login(code string) (User, int, error) {
 	return &user, 0, nil
 }
 
-func (s *_Service) SubstractRichesByUserID(userID string, amount float32) error {
-	query := bson.M{"user_id": userID}
-	update := bson.M{"$inc": bson.M{"riches": -1 * amount}}
+func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, amount float32) error {
+	err := s.ensureTickerIsPresent(userID, ticker)
+	if err != nil {
+		return err
+	}
+
+	query := bson.M{"user_id": userID, "stocks.ticker": ticker}
+	update := bson.M{"$inc": bson.M{"riches": -1 * amount, "stocks.$.quantity": 1}}
 
 	return s.profiles.Update(query, update)
 }
@@ -153,6 +159,18 @@ func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
 
 	return claims.UserID, nil
 	// return "", nil
+}
+
+func (s *_Service) ensureTickerIsPresent(userID, ticker string) error {
+	query := bson.M{"user_id": userID, "stocks.ticker": bson.M{"$ne": ticker}}
+	update := bson.M{"$addToSet": bson.M{"stocks": bson.M{"ticker": ticker, "quantity": 0}}}
+
+	err := s.profiles.Update(query, update)
+	if err != nil && err != mgo.ErrNotFound {
+		return err
+	}
+
+	return nil
 }
 
 type _ProfileClaims struct {
