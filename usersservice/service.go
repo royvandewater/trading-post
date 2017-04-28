@@ -15,9 +15,9 @@ import (
 
 // UsersService manages CRUD for buy & sell users
 type UsersService interface {
-	// AddRichesByUserID adds to the user's riches. Will
+	// UpdateForSellOrderByUserID adds to the user's riches. Will
 	// return an error if the user cannot be found
-	AddRichesByUserID(userID string, amount float32) error
+	UpdateForSellOrderByUserID(userID, ticker string, amount float32) error
 
 	// GetProfile retrieves a profile for a userID
 	GetProfile(userID string) (Profile, error)
@@ -47,13 +47,6 @@ func New(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) UsersService {
 type _Service struct {
 	auth0Creds auth0creds.Auth0Creds
 	profiles   *mgo.Collection
-}
-
-func (s *_Service) AddRichesByUserID(userID string, amount float32) error {
-	query := bson.M{"user_id": userID}
-	update := bson.M{"$inc": bson.M{"riches": amount}}
-
-	return s.profiles.Update(query, update)
 }
 
 func (s *_Service) GetProfile(userID string) (Profile, error) {
@@ -140,6 +133,28 @@ func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, amount float
 	update := bson.M{"$inc": bson.M{"riches": -1 * amount, "stocks.$.quantity": 1}}
 
 	return s.profiles.Update(query, update)
+}
+
+func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, amount float32) error {
+	query := bson.M{
+		"user_id": userID,
+		"stocks": bson.M{
+			"$elemMatch": bson.M{
+				"ticker": ticker,
+				"quantity": bson.M{
+					"$gt": 0,
+				},
+			},
+		},
+	}
+	update := bson.M{"$inc": bson.M{"riches": amount, "stocks.$.quantity": -1}}
+
+	err := s.profiles.Update(query, update)
+	if err != nil && err == mgo.ErrNotFound {
+		return fmt.Errorf("Insufficient quantity available for: %v", ticker)
+	}
+
+	return err
 }
 
 func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {

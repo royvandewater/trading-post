@@ -78,13 +78,13 @@ func (s *_Service) CreateSellOrder(userID, ticker string) (SellOrder, error) {
 		return nil, err
 	}
 
-	order := NewSellOrder(userID, ticker, price)
-	err = s.sellOrders.Insert(order)
+	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, price)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.usersService.AddRichesByUserID(order.GetUserID(), price)
+	order := NewSellOrder(userID, ticker, price)
+	err = s.sellOrders.Insert(order)
 	if err != nil {
 		return nil, err
 	}
