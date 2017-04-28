@@ -7,11 +7,29 @@ import (
 )
 
 func formatGetResponse(profile usersservice.Profile) ([]byte, error) {
-	return json.MarshalIndent(struct {
-		Name   string  `json:"name"`
-		Riches float32 `json:"riches"`
-	}{
+	_stocks := make([]_Stock, len(profile.GetStocks()))
+
+	for i, stock := range profile.GetStocks() {
+		_stocks[i] = _Stock{
+			Quantity: stock.GetQuantity(),
+			Ticker:   stock.GetTicker(),
+		}
+	}
+
+	return json.MarshalIndent(_GetProfile{
 		Name:   profile.GetName(),
 		Riches: profile.GetRiches(),
+		Stocks: _stocks,
 	}, "", "  ")
+}
+
+type _GetProfile struct {
+	Name   string   `json:"name"`
+	Riches float32  `json:"riches"`
+	Stocks []_Stock `json:"stocks"`
+}
+
+type _Stock struct {
+	Quantity int    `json:"quantity"`
+	Ticker   string `json:"ticker"`
 }
