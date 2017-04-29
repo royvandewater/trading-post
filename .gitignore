@@ -28,3 +28,5 @@ go-trading-post
 entrypoint/go-trading-post
 dist
 private
+config/*.yml
+config/mongo-data/*

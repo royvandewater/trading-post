@@ -1,0 +1,6 @@
+AUTH0_CALLBACK_URL=http://localhost:3000/callback
+AUTH0_CLIENT_ID=alsdjkfasldkjf
+AUTH0_CLIENT_SECRET=lajsdfncxv_aljr34jjajdv88f7asdfJDF_asldkjff
+AUTH0_DOMAIN=trading-post.auth0.com
+MONGODB_URL=mongodb://mongo:27017
+PORT=3000
