@@ -1,4 +1,4 @@
-FROM golang:1.6
+FROM golang:1.8
 MAINTAINER Octoblu, Inc. <docker@octoblu.com>
 
 WORKDIR /go/src/github.com/octoblu/trading-post

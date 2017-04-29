@@ -1,5 +1,5 @@
-FROM scratch
+FROM centurylink/ca-certs 
 MAINTAINER Octoblu, Inc. <docker@octoblu.com>
 
-ADD trading-post trading-post
-ENTRYPOINT ["./trading-post"]
+ADD entrypoint entrypoint
+ENTRYPOINT ["./entrypoint"]
