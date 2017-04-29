@@ -64,6 +64,7 @@ func (c *_Controller) Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(statusCode)
 	rw.Write(userJSON)
 }

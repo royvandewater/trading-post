@@ -37,9 +37,9 @@ type Stock interface {
 }
 
 type _User struct {
-	IDToken     string   `json:"id_token"`
-	AccessToken string   `json:"access_token"`
-	Profile     _Profile `json:"profile"`
+	IDToken     string    `json:"id_token"`
+	AccessToken string    `json:"access_token"`
+	Profile     *_Profile `json:"profile"`
 }
 
 func (u *_User) JSON() ([]byte, error) {
@@ -50,7 +50,7 @@ type _Profile struct {
 	UserID string  `bson:"user_id" json:"user_id"`
 	Name   string  `bson:"name" json:"name"`
 	Riches float32 `bson:"riches,omitempty" json:"riches,omitempty"`
-	Stocks []_Stock
+	Stocks []*_Stock
 }
 
 func (p *_Profile) GetName() string {
@@ -65,7 +65,7 @@ func (p *_Profile) GetStocks() []Stock {
 	stocks := make([]Stock, len(p.Stocks))
 
 	for i, _stock := range p.Stocks {
-		stocks[i] = &_stock
+		stocks[i] = _stock
 	}
 
 	return stocks

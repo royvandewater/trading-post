@@ -106,7 +106,7 @@ func (s *_Service) Login(code string) (User, int, error) {
 		return &_User{
 			IDToken:     token.Extra("id_token").(string),
 			AccessToken: token.AccessToken,
-			Profile:     profile,
+			Profile:     &profile,
 		}, 0, nil
 	}
 
@@ -118,7 +118,7 @@ func (s *_Service) Login(code string) (User, int, error) {
 	user := _User{
 		IDToken:     token.Extra("id_token").(string),
 		AccessToken: token.AccessToken,
-		Profile:     profile,
+		Profile:     &profile,
 	}
 	return &user, 0, nil
 }
