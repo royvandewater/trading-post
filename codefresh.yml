@@ -24,6 +24,8 @@ steps:
       # Install pre-requisites and execute tests
       - cd /go/src/github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} && go get
       - cd /go/src/github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} && env CGO_ENABLED=0 go build -o entrypoint/entrypoint -a -ldflags '-s' .
+      # Copy static files
+      - cd /go/src/github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} && cp -r html entrypoint/html
 
   build_image:
     type: build
