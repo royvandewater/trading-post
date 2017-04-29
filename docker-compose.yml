@@ -1,7 +1,7 @@
 version: '3'
 services:
   application:
-    image: royvandewater/trading-post:v1.0.0
+    image: royvandewater/trading-post:v1.0.1
     env_file: './config/trading-post.env'
     ports:
       - "80:80"
