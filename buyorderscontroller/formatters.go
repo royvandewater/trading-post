@@ -37,6 +37,6 @@ func formatListResponse(orders []ordersservice.BuyOrder) ([]byte, error) {
 
 type _OrderResponse struct {
 	ID     string  `json:"id"`
-	Price  float32 `json:"purchase_price"`
+	Price  float32 `json:"price"`
 	Ticker string  `json:"ticker"`
 }

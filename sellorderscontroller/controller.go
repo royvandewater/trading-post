@@ -11,8 +11,8 @@ import (
 // Controller handles HTTP requests
 // regarding sell orders
 type Controller interface {
-	// Create creates a new order and subtracts the market rate
-	// from the profile's riches
+	// Create creates a new order and adds the market rate
+	// to the profile's riches
 	Create(rw http.ResponseWriter, r *http.Request)
 	//
 	// // Get retrieves a single order by id
