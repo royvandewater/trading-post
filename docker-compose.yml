@@ -12,7 +12,7 @@ services:
   mongo:
     image: mongo
     volumes:
-      - ./mongo-data:/data/db
+      - ./config/mongo-data:/data/db
     networks:
       - trading-post
 networks:
