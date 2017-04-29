@@ -30,3 +30,4 @@ dist
 private
 config/*.yml
 config/mongo-data/*
+config/letsencrypt/*
