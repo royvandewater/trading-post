@@ -18,7 +18,7 @@ services:
     volumes:
       - ./var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml
-      - ./config/traefik/acme:/etc/traefik/acme
+      - ./config/traefik/acme.json:/etc/traefik/acme/acme.json
     ports:
       - "80:80"
       - "443:443"
