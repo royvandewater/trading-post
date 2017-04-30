@@ -6,7 +6,7 @@ services:
     labels:
       - traefik.docker.network=trading-post
       - traefik.frontend.rule=Host:trading-post.club
-      - traefik.port=Host:trading-post.club
+      - traefik.port=80
     deploy:
       replicas: 2
     networks:
