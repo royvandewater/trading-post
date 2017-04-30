@@ -107,7 +107,7 @@ func (s *_Service) Login(code string) (User, int, error) {
 			IDToken:     token.Extra("id_token").(string),
 			AccessToken: token.AccessToken,
 			Profile:     &profile,
-		}, 0, nil
+		}, 200, nil
 	}
 
 	_, err = s.profiles.Upsert(bson.M{"user_id": userID}, &profile)
@@ -120,7 +120,7 @@ func (s *_Service) Login(code string) (User, int, error) {
 		AccessToken: token.AccessToken,
 		Profile:     &profile,
 	}
-	return &user, 0, nil
+	return &user, 200, nil
 }
 
 func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, amount float32) error {
