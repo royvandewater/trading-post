@@ -16,7 +16,7 @@
   var lock = new Auth0Lock('qHuHbvyFn0LRXxFMiCHKpMSIEVCchYNd', 'trading-post.auth0.com', {
     container: 'root',
     auth: {
-      redirectUrl: 'http://localhost:3000/callback',
+      redirectUrl: '/callback',
       responseType: 'code',
       params: {
         scope: 'openid email' // Learn about scopes: https://auth0.com/docs/scopes
