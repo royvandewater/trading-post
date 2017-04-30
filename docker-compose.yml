@@ -3,12 +3,13 @@ services:
   application:
     image: royvandewater/trading-post:v1.0.2
     env_file: './config/trading-post.env'
-    labels:
-      - traefik.docker.network=trading-post
-      - traefik.frontend.rule=Host:trading-post.club
-      - traefik.port=80
     deploy:
       replicas: 2
+      labels:
+        - traefik.docker.network=trading-post
+        - traefik.frontend.rule=Host:trading-post.club
+        - traefik.frontend.entryPoints=http,https
+        - traefik.port=80
     networks:
       - trading-post
   mongo:
