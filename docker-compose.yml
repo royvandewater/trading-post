@@ -15,7 +15,6 @@ services:
       - trading-post
   traefik:
     image: traefik
-    command: ["--docker","--docker.swarmmode","--docker.swarmmode=trading-post.club","--docker.watch","--web"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml
