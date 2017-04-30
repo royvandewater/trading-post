@@ -3,8 +3,6 @@ services:
   application:
     image: royvandewater/trading-post:v1.0.2
     env_file: './config/trading-post.env'
-    ports:
-      - "80:80"
     deploy:
       replicas: 2
     networks:
@@ -13,6 +11,19 @@ services:
     image: mongo
     volumes:
       - ./config/mongo-data:/data/db
+    networks:
+      - trading-post
+  traefik:
+    image: traefik
+    volumes:
+      - ./var/run/docker.sock:/var/run/docker.sock
+      - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - ./config/traefik/acme:/etc/traefik/acme
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "8181:8181"
     networks:
       - trading-post
 networks:
