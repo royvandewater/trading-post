@@ -10,7 +10,7 @@ A hosted version of this can be found at [https://trading-post.club](https://tra
 Return the current user profile, including all currently owned stocks.
 
 ```shell
-curl --header 'Authorization: Bearer <id_token>' http://localhost:3000/profile/
+curl --header 'Authorization: Bearer <id_token>' https://trading-post.club/profile/
 # {
 #   "name": "Roy van de Water",
 #   "riches": -1067.8401,
@@ -36,7 +36,7 @@ curl \
   --request 'POST' \
   --header 'Authorization: Bearer <id_token>' \
   --data '{"ticker": "goog", "quantity": 3}' \
-  http://localhost:3000/profile/buy-orders
+  https://trading-post.club/profile/buy-orders
 # {
 #   "id": "2fa48bba-dddb-4f23-8c95-bd2dd9e07ed3",
 #   "price": 905.96,
@@ -54,7 +54,7 @@ curl \
   --request 'POST' \
   --header 'Authorization: Bearer <id_token>' \
   --data '{"ticker": "goog", "quantity": 3}' \
-  http://localhost:3000/profile/sell-orders
+  https://trading-post.club/profile/sell-orders
 # {
 #   "id": "ffe2ea60-9695-4e2b-8fd3-c978020f213b",
 #   "price": 905.96,
