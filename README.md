@@ -33,11 +33,12 @@ Create a new buy order and subtract the market rate from the profile's riches.
 curl \
   --request 'POST' \
   --header 'Authorization: Bearer <id_token>' \
-  --data '{"ticker": "goog"}' \
+  --data '{"ticker": "goog", "quantity": 3}' \
   http://localhost:3000/profile/buy-orders
 # {
 #   "id": "2fa48bba-dddb-4f23-8c95-bd2dd9e07ed3",
 #   "price": 905.96,
+#   "quantity": 3,
 #   "ticker": "goog"
 # }
 ```
@@ -50,11 +51,12 @@ Create a new sell order and add the market rate to the profile's riches
 curl \
   --request 'POST' \
   --header 'Authorization: Bearer <id_token>' \
-  --data '{"ticker": "goog"}' \
+  --data '{"ticker": "goog", "quantity": 3}' \
   http://localhost:3000/profile/sell-orders
 # {
 #   "id": "ffe2ea60-9695-4e2b-8fd3-c978020f213b",
 #   "price": 905.96,
+#   "quantity": 3,
 #   "ticker": "goog"
 # }
 ```
