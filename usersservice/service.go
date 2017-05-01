@@ -17,7 +17,7 @@ import (
 type UsersService interface {
 	// UpdateForSellOrderByUserID adds to the user's riches. Will
 	// return an error if the user cannot be found
-	UpdateForSellOrderByUserID(userID, ticker string, amount float32) error
+	UpdateForSellOrderByUserID(userID, ticker string, quantity int, amount float32) error
 
 	// GetProfile retrieves a profile for a userID
 	GetProfile(userID string) (Profile, error)
@@ -135,19 +135,19 @@ func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, quantity int
 	return s.profiles.Update(query, update)
 }
 
-func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, amount float32) error {
+func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, quantity int, amount float32) error {
 	query := bson.M{
 		"user_id": userID,
 		"stocks": bson.M{
 			"$elemMatch": bson.M{
 				"ticker": ticker,
 				"quantity": bson.M{
-					"$gt": 0,
+					"$gte": quantity,
 				},
 			},
 		},
 	}
-	update := bson.M{"$inc": bson.M{"riches": amount, "stocks.$.quantity": -1}}
+	update := bson.M{"$inc": bson.M{"riches": float32(quantity) * amount, "stocks.$.quantity": -1 * quantity}}
 
 	err := s.profiles.Update(query, update)
 	if err != nil && err == mgo.ErrNotFound {

@@ -31,7 +31,7 @@ type OrdersService interface {
 	// to the given user's riches and the user's stock quantity
 	// for this ticker will go down. It will return an error if
 	// the user doesn't own enough of the stock
-	CreateSellOrder(userID, ticker string) (SellOrder, error)
+	CreateSellOrder(userID, ticker string, quantity int) (SellOrder, error)
 }
 
 // New constructs a new BuyOrdersService that will
@@ -72,18 +72,18 @@ func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder
 	return order, nil
 }
 
-func (s *_Service) CreateSellOrder(userID, ticker string) (SellOrder, error) {
+func (s *_Service) CreateSellOrder(userID, ticker string, quantity int) (SellOrder, error) {
 	price, err := stockPrice(ticker)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, price)
+	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, quantity, price)
 	if err != nil {
 		return nil, err
 	}
 
-	order := NewSellOrder(userID, ticker, price)
+	order := NewSellOrder(userID, ticker, quantity, price)
 	err = s.sellOrders.Insert(order)
 	if err != nil {
 		return nil, err
