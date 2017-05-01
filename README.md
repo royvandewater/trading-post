@@ -1,6 +1,8 @@
 # trading-post
 Store stock trading transactions with funny money
 
+A hosted version of this can be found at [https://trading-post.club](https://trading-post.club).
+
 ## API
 
 ### GET `/profile/`
