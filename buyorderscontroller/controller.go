@@ -41,7 +41,7 @@ func (controller *_Controller) Create(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, err := controller.ordersService.CreateBuyOrder(user.ID, createBody.Ticker)
+	order, err := controller.ordersService.CreateBuyOrder(user.ID, createBody.Ticker, createBody.Quantity)
 	if err != nil {
 		http.Error(rw, err.Error(), 500)
 		return

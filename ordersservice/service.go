@@ -18,7 +18,7 @@ type OrdersService interface {
 	// for the given ticker. The market rate will be subtracted
 	// from the given profile's riches and the user's stock
 	// quantity for this ticker will go up.
-	CreateBuyOrder(userID, ticker string) (BuyOrder, error)
+	CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder, error)
 
 	// GetBuyOrder will retrieve a buy order for a given user & id
 	GetBuyOrder(userID, id string) (BuyOrder, error)
@@ -52,19 +52,19 @@ type _Service struct {
 	usersService usersservice.UsersService
 }
 
-func (s *_Service) CreateBuyOrder(userID, ticker string) (BuyOrder, error) {
+func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder, error) {
 	purchasePrice, err := stockPrice(ticker)
 	if err != nil {
 		return nil, err
 	}
 
-	order := NewBuyOrder(userID, ticker, purchasePrice)
+	order := NewBuyOrder(userID, ticker, quantity, purchasePrice)
 	err = s.buyOrders.Insert(order)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, purchasePrice)
+	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, quantity, purchasePrice)
 	if err != nil {
 		return nil, err
 	}

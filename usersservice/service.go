@@ -30,7 +30,7 @@ type UsersService interface {
 	// UpdateForBuyOrderByUserID removes riches from the user and adds
 	// to the stock quantity for the given ticker. Will
 	// return an error if the user cannot be found
-	UpdateForBuyOrderByUserID(userID, ticker string, amount float32) error
+	UpdateForBuyOrderByUserID(userID, ticker string, quantity int, price float32) error
 
 	// UserIDForAccessToken verifies the RS256 signature
 	// of a JWT access token
@@ -123,14 +123,14 @@ func (s *_Service) Login(code string) (User, int, error) {
 	return &user, 200, nil
 }
 
-func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, amount float32) error {
+func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, quantity int, price float32) error {
 	err := s.ensureTickerIsPresent(userID, ticker)
 	if err != nil {
 		return err
 	}
 
 	query := bson.M{"user_id": userID, "stocks.ticker": ticker}
-	update := bson.M{"$inc": bson.M{"riches": -1 * amount, "stocks.$.quantity": 1}}
+	update := bson.M{"$inc": bson.M{"riches": -1 * float32(quantity) * price, "stocks.$.quantity": quantity}}
 
 	return s.profiles.Update(query, update)
 }
