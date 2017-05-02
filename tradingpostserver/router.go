@@ -33,6 +33,8 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 	profileRouter.Methods("GET").Path("/buy-orders/{id}").HandlerFunc(buyOrdersController.Get)
 
 	profileRouter.Methods("POST").Path("/sell-orders").HandlerFunc(sellOrdersController.Create)
+	profileRouter.Methods("GET").Path("/sell-orders").HandlerFunc(sellOrdersController.List)
+	profileRouter.Methods("GET").Path("/sell-orders/{id}").HandlerFunc(sellOrdersController.Get)
 
 	router := mux.NewRouter()
 	router.Methods("GET").Path("/callback").HandlerFunc(usersController.Login)

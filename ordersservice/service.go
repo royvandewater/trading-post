@@ -23,8 +23,14 @@ type OrdersService interface {
 	// GetBuyOrder will retrieve a buy order for a given user & id
 	GetBuyOrder(userID, id string) (BuyOrder, error)
 
+	// GetSellOrder will retrieve a sell order for a given user & id
+	GetSellOrder(userID, id string) (SellOrder, error)
+
 	// ListBuyOrders returns all orders for a user
 	ListBuyOrders(userID string) ([]BuyOrder, error)
+
+	// ListSellOrders returns all orders for a user
+	ListSellOrders(userID string) ([]SellOrder, error)
 
 	// CreateSellOrder will persist a new sell order at the market rate
 	// for the given ticker. The market rate will be added
@@ -110,6 +116,17 @@ func (s *_Service) GetBuyOrder(userID, id string) (BuyOrder, error) {
 	return &_order, nil
 }
 
+func (s *_Service) GetSellOrder(userID, id string) (SellOrder, error) {
+	_order := _SellOrder{}
+
+	err := s.sellOrders.Find(bson.M{"user_id": userID, "id": id}).One(&_order)
+	if err != nil {
+		return nil, err
+	}
+
+	return &_order, nil
+}
+
 func (s *_Service) ListBuyOrders(userID string) ([]BuyOrder, error) {
 	var _orders []*_BuyOrder
 
@@ -119,6 +136,22 @@ func (s *_Service) ListBuyOrders(userID string) ([]BuyOrder, error) {
 	}
 
 	orders := make([]BuyOrder, len(_orders))
+	for i, _order := range _orders {
+		orders[i] = _order
+	}
+
+	return orders, nil
+}
+
+func (s *_Service) ListSellOrders(userID string) ([]SellOrder, error) {
+	var _orders []*_SellOrder
+
+	err := s.sellOrders.Find(bson.M{"user_id": userID}).All(&_orders)
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]SellOrder, len(_orders))
 	for i, _order := range _orders {
 		orders[i] = _order
 	}
