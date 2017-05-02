@@ -58,7 +58,7 @@ func (c *_Controller) Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userJSON, err := user.JSON()
+	userJSON, err := formatUser(user)
 	if err != nil {
 		http.Error(rw, fmt.Sprintf("Failed to generate JSON response: %v", err.Error()), http.StatusInternalServerError)
 		return

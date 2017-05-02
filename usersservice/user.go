@@ -9,6 +9,15 @@ import (
 // Only the profile portion of a user is ever stored
 // server side
 type User interface {
+	// GetAccessToken returns the user's access token
+	GetAccessToken() string
+
+	// GetIDToken returns the user's ID token
+	GetIDToken() string
+
+	// GetProfile returns the user profile
+	GetProfile() Profile
+
 	// JSON serializes the user record
 	JSON() ([]byte, error)
 }
@@ -40,6 +49,18 @@ type _User struct {
 	IDToken     string    `json:"id_token"`
 	AccessToken string    `json:"access_token"`
 	Profile     *_Profile `json:"profile"`
+}
+
+func (u *_User) GetAccessToken() string {
+	return u.AccessToken
+}
+
+func (u *_User) GetIDToken() string {
+	return u.IDToken
+}
+
+func (u *_User) GetProfile() Profile {
+	return u.Profile
 }
 
 func (u *_User) JSON() ([]byte, error) {
