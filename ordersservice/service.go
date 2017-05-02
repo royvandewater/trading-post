@@ -57,6 +57,9 @@ func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder
 	if err != nil {
 		return nil, err
 	}
+	if purchasePrice <= 0 {
+		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", purchasePrice)
+	}
 
 	order := NewBuyOrder(userID, ticker, quantity, purchasePrice)
 	err = s.buyOrders.Insert(order)
@@ -76,6 +79,10 @@ func (s *_Service) CreateSellOrder(userID, ticker string, quantity int) (SellOrd
 	price, err := stockPrice(ticker)
 	if err != nil {
 		return nil, err
+	}
+
+	if price <= 0 {
+		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", price)
 	}
 
 	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, quantity, price)
