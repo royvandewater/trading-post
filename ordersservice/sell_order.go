@@ -1,6 +1,10 @@
 package ordersservice
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 // SellOrder represents a sell order for a
 // specific stock
@@ -18,28 +22,33 @@ type SellOrder interface {
 	// GetTicker returns the stock ticker code
 	GetTicker() string
 
+	// GetTimestamp returns the timestamp from when the order was created
+	GetTimestamp() time.Time
+
 	// GetUserID returns the user who will be paying the order
 	GetUserID() string
 }
 
 // NewSellOrder constructs a new order instance given a user, ticker, and price.
 // it will also gain an ID, representing just this order instance
-func NewSellOrder(userID, ticker string, quantity int, price float32) SellOrder {
+func NewSellOrder(userID, ticker string, quantity int, price float32, timestamp time.Time) SellOrder {
 	return &_SellOrder{
-		ID:       uuid.NewV4().String(),
-		Price:    price,
-		Quantity: quantity,
-		Ticker:   ticker,
-		UserID:   userID,
+		ID:        uuid.NewV4().String(),
+		Price:     price,
+		Quantity:  quantity,
+		Ticker:    ticker,
+		Timestamp: timestamp.UTC(),
+		UserID:    userID,
 	}
 }
 
 type _SellOrder struct {
-	ID       string  `bson:"id"`
-	Price    float32 `bson:"price"`
-	Quantity int     `bson:"quantity"`
-	Ticker   string  `bson:"ticker"`
-	UserID   string  `bson:"user_id"`
+	ID        string    `bson:"id"`
+	Price     float32   `bson:"price"`
+	Quantity  int       `bson:"quantity"`
+	Ticker    string    `bson:"ticker"`
+	Timestamp time.Time `bson:"timestamp"`
+	UserID    string    `bson:"user_id"`
 }
 
 func (order *_SellOrder) GetID() string {
@@ -56,6 +65,10 @@ func (order *_SellOrder) GetQuantity() int {
 
 func (order *_SellOrder) GetTicker() string {
 	return order.Ticker
+}
+
+func (order *_SellOrder) GetTimestamp() time.Time {
+	return order.Timestamp
 }
 
 func (order *_SellOrder) GetUserID() string {

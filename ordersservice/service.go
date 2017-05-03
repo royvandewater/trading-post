@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/royvandewater/trading-post/usersservice"
 
@@ -67,7 +68,7 @@ func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder
 		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", purchasePrice)
 	}
 
-	order := NewBuyOrder(userID, ticker, quantity, purchasePrice)
+	order := NewBuyOrder(userID, ticker, quantity, purchasePrice, time.Now())
 	err = s.buyOrders.Insert(order)
 	if err != nil {
 		return nil, err
@@ -96,7 +97,7 @@ func (s *_Service) CreateSellOrder(userID, ticker string, quantity int) (SellOrd
 		return nil, err
 	}
 
-	order := NewSellOrder(userID, ticker, quantity, price)
+	order := NewSellOrder(userID, ticker, quantity, price, time.Now())
 	err = s.sellOrders.Insert(order)
 	if err != nil {
 		return nil, err
