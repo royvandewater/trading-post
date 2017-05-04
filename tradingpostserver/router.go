@@ -13,6 +13,7 @@ import (
 	"github.com/royvandewater/trading-post/sellorderscontroller"
 	"github.com/royvandewater/trading-post/userscontroller"
 	"github.com/royvandewater/trading-post/usersservice"
+	"github.com/rs/cors"
 	"github.com/urfave/negroni"
 )
 
@@ -44,5 +45,10 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 	))
 	router.Methods("GET").Handler(http.FileServer(http.Dir("html/")))
 
-	return router
+	allowCORS := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"DELETE", "GET", "PATCH", "POST", "PUT"},
+		AllowCredentials: true,
+	})
+	return negroni.New(allowCORS, negroni.Wrap(router))
 }
