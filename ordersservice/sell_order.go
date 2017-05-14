@@ -14,7 +14,8 @@ type SellOrder interface {
 	GetID() string
 
 	// GetPrice returns the price the order was purchased at
-	GetPrice() float32
+	// in increments of 1/1000 of a penny
+	GetPrice() int
 
 	// GetQuantity returns the quantity of stock sold
 	GetQuantity() int
@@ -31,7 +32,7 @@ type SellOrder interface {
 
 // NewSellOrder constructs a new order instance given a user, ticker, and price.
 // it will also gain an ID, representing just this order instance
-func NewSellOrder(userID, ticker string, quantity int, price float32, timestamp time.Time) SellOrder {
+func NewSellOrder(userID, ticker string, quantity, price int, timestamp time.Time) SellOrder {
 	return &_SellOrder{
 		ID:        uuid.NewV4().String(),
 		Price:     price,
@@ -44,7 +45,7 @@ func NewSellOrder(userID, ticker string, quantity int, price float32, timestamp 
 
 type _SellOrder struct {
 	ID        string    `bson:"id"`
-	Price     float32   `bson:"price"`
+	Price     int       `bson:"price"`
 	Quantity  int       `bson:"quantity"`
 	Ticker    string    `bson:"ticker"`
 	Timestamp time.Time `bson:"timestamp"`
@@ -55,7 +56,7 @@ func (order *_SellOrder) GetID() string {
 	return order.ID
 }
 
-func (order *_SellOrder) GetPrice() float32 {
+func (order *_SellOrder) GetPrice() int {
 	return order.Price
 }
 

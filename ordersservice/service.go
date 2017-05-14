@@ -65,7 +65,7 @@ func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder
 		return nil, err
 	}
 	if purchasePrice <= 0 {
-		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", purchasePrice)
+		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", float64(purchasePrice)/1000)
 	}
 
 	order := NewBuyOrder(userID, ticker, quantity, purchasePrice, time.Now())
@@ -74,7 +74,7 @@ func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder
 		return nil, err
 	}
 
-	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, quantity, int(purchasePrice*1000))
+	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, quantity, purchasePrice)
 	if err != nil {
 		return nil, err
 	}
@@ -89,10 +89,10 @@ func (s *_Service) CreateSellOrder(userID, ticker string, quantity int) (SellOrd
 	}
 
 	if price <= 0 {
-		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", price)
+		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", float64(price)/1000)
 	}
 
-	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, quantity, int(price*1000))
+	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, quantity, price)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (s *_Service) ListSellOrders(userID string) ([]SellOrder, error) {
 	return orders, nil
 }
 
-func stockPrice(ticker string) (float32, error) {
+func stockPrice(ticker string) (int, error) {
 	url := fmt.Sprintf("https://stock.octoblu.com/last-trade-price/%v", ticker)
 	response, err := http.Get(url)
 
@@ -178,7 +178,7 @@ func stockPrice(ticker string) (float32, error) {
 	}
 
 	stockResponse := struct {
-		Price float32 `json:"price"`
+		Price float64 `json:"price"`
 	}{}
 
 	err = json.Unmarshal(data, &stockResponse)
@@ -186,5 +186,5 @@ func stockPrice(ticker string) (float32, error) {
 		return 0, err
 	}
 
-	return stockResponse.Price, nil
+	return int(stockResponse.Price * 1000), nil
 }

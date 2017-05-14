@@ -14,7 +14,8 @@ type BuyOrder interface {
 	GetID() string
 
 	// GetPrice returns the price the order was purchased at
-	GetPrice() float32
+	// in increments of 1/1000 of a penny
+	GetPrice() int
 
 	// GetQuantity returns the quantity of stock purchased
 	GetQuantity() int
@@ -31,7 +32,7 @@ type BuyOrder interface {
 
 // NewBuyOrder constructs a new order instance given a user, ticker, and price.
 // it will also gain an ID, representing just this order instance
-func NewBuyOrder(userID, ticker string, quantity int, price float32, timestamp time.Time) BuyOrder {
+func NewBuyOrder(userID, ticker string, quantity, price int, timestamp time.Time) BuyOrder {
 	return &_BuyOrder{
 		ID:        uuid.NewV4().String(),
 		Price:     price,
@@ -44,7 +45,7 @@ func NewBuyOrder(userID, ticker string, quantity int, price float32, timestamp t
 
 type _BuyOrder struct {
 	ID        string    `bson:"id"`
-	Price     float32   `bson:"price"`
+	Price     int       `bson:"price"`
 	Quantity  int       `bson:"quantity"`
 	Ticker    string    `bson:"ticker"`
 	Timestamp time.Time `bson:"timestamp"`
@@ -55,7 +56,7 @@ func (order *_BuyOrder) GetID() string {
 	return order.ID
 }
 
-func (order *_BuyOrder) GetPrice() float32 {
+func (order *_BuyOrder) GetPrice() int {
 	return order.Price
 }
 
