@@ -18,14 +18,14 @@ func formatGetResponse(profile usersservice.Profile) ([]byte, error) {
 
 	return json.MarshalIndent(_GetProfile{
 		Name:   profile.GetName(),
-		Riches: profile.GetRiches(),
+		Riches: float64(profile.GetRiches()) / 1000,
 		Stocks: _stocks,
 	}, "", "  ")
 }
 
 type _GetProfile struct {
 	Name   string   `json:"name"`
-	Riches float32  `json:"riches"`
+	Riches float64  `json:"riches"`
 	Stocks []_Stock `json:"stocks"`
 }
 

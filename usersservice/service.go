@@ -17,7 +17,7 @@ import (
 type UsersService interface {
 	// UpdateForSellOrderByUserID adds to the user's riches. Will
 	// return an error if the user cannot be found
-	UpdateForSellOrderByUserID(userID, ticker string, quantity int, amount float32) error
+	UpdateForSellOrderByUserID(userID, ticker string, quantity int, amount int) error
 
 	// GetProfile retrieves a profile for a userID
 	GetProfile(userID string) (Profile, error)
@@ -30,7 +30,7 @@ type UsersService interface {
 	// UpdateForBuyOrderByUserID removes riches from the user and adds
 	// to the stock quantity for the given ticker. Will
 	// return an error if the user cannot be found
-	UpdateForBuyOrderByUserID(userID, ticker string, quantity int, price float32) error
+	UpdateForBuyOrderByUserID(userID, ticker string, quantity int, price int) error
 
 	// UserIDForAccessToken verifies the RS256 signature
 	// of a JWT access token
@@ -123,19 +123,19 @@ func (s *_Service) Login(code string) (User, int, error) {
 	return &user, 200, nil
 }
 
-func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, quantity int, price float32) error {
+func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, quantity int, price int) error {
 	err := s.ensureTickerIsPresent(userID, ticker)
 	if err != nil {
 		return err
 	}
 
 	query := bson.M{"user_id": userID, "stocks.ticker": ticker}
-	update := bson.M{"$inc": bson.M{"riches": -1 * float32(quantity) * price, "stocks.$.quantity": quantity}}
+	update := bson.M{"$inc": bson.M{"riches": -1 * quantity * price, "stocks.$.quantity": quantity}}
 
 	return s.profiles.Update(query, update)
 }
 
-func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, quantity int, amount float32) error {
+func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, quantity int, amount int) error {
 	query := bson.M{
 		"user_id": userID,
 		"stocks": bson.M{
@@ -147,7 +147,7 @@ func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, quantity in
 			},
 		},
 	}
-	update := bson.M{"$inc": bson.M{"riches": float32(quantity) * amount, "stocks.$.quantity": -1 * quantity}}
+	update := bson.M{"$inc": bson.M{"riches": quantity * amount, "stocks.$.quantity": -1 * quantity}}
 
 	err := s.profiles.Update(query, update)
 	if err != nil && err == mgo.ErrNotFound {

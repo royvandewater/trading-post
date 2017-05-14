@@ -74,7 +74,7 @@ func (s *_Service) CreateBuyOrder(userID, ticker string, quantity int) (BuyOrder
 		return nil, err
 	}
 
-	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, quantity, purchasePrice)
+	err = s.usersService.UpdateForBuyOrderByUserID(order.GetUserID(), ticker, quantity, int(purchasePrice*1000))
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (s *_Service) CreateSellOrder(userID, ticker string, quantity int) (SellOrd
 		return nil, fmt.Errorf("Price must be > 0, is currently: %v. Refusing to place order", price)
 	}
 
-	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, quantity, price)
+	err = s.usersService.UpdateForSellOrderByUserID(userID, ticker, quantity, int(price*1000))
 	if err != nil {
 		return nil, err
 	}

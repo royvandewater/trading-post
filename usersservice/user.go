@@ -28,8 +28,9 @@ type Profile interface {
 	// GetName returns the profile's name
 	GetName() string
 
-	// GetRiches returns the profile's riches
-	GetRiches() float32
+	// GetRiches returns the profile's riches, counted in 1/1000th of a dollars
+	// i.e, a value of 1000 would be $1
+	GetRiches() int
 
 	// GetStocks returns the profile's stocks
 	GetStocks() []Stock
@@ -70,7 +71,7 @@ func (u *_User) JSON() ([]byte, error) {
 type _Profile struct {
 	UserID string    `bson:"user_id" json:"user_id"`
 	Name   string    `bson:"name" json:"name"`
-	Riches float32   `bson:"riches,omitempty" json:"riches,omitempty"`
+	Riches int       `bson:"riches,omitempty" json:"riches,omitempty"`
 	Stocks []*_Stock `bson:"stocks"`
 }
 
@@ -78,7 +79,7 @@ func (p *_Profile) GetName() string {
 	return p.Name
 }
 
-func (p *_Profile) GetRiches() float32 {
+func (p *_Profile) GetRiches() int {
 	return p.Riches
 }
 

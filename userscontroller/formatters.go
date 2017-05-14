@@ -19,7 +19,7 @@ func formatUser(user usersservice.User) ([]byte, error) {
 
 	_profile := &_Profile{
 		Name:   profile.GetName(),
-		Riches: profile.GetRiches(),
+		Riches: float64(profile.GetRiches()) / 1000,
 		Stocks: _stocks,
 	}
 
@@ -39,7 +39,7 @@ type _User struct {
 type _Profile struct {
 	UserID string    `json:"user_id"`
 	Name   string    `json:"name"`
-	Riches float32   `json:"riches"`
+	Riches float64   `json:"riches"`
 	Stocks []*_Stock `json:"stocks"`
 }
 
