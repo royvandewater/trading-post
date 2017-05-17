@@ -130,7 +130,7 @@ func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, quantity, a
 func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
 	claims := &_ProfileClaims{}
 
-	_, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
@@ -138,9 +138,18 @@ func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
 		return []byte(s.auth0Creds.ClientSecret), nil
 	})
 
-	if err != nil {
+	if token.Valid {
+		return claims.UserID, nil
+	}
+	if validationErr, ok := err.(*jwt.ValidationError); ok {
+		// if jwt.ValidationErrorExpired is the only error, return
+		if validationErr.Errors&^jwt.ValidationErrorExpired == 0 {
+			return claims.UserID, nil
+		}
 		return "", err
 	}
+
+	return "", err
 
 	// token := &oauth2.Token{AccessToken: accessToken}
 	// _, err = s.findOrCreateProfile(token)
@@ -148,7 +157,6 @@ func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
 	// 	return "", err
 	// }
 	//
-	return claims.UserID, nil
 }
 
 func (s *_Service) ensureTickerIsPresent(userID, ticker string) error {
