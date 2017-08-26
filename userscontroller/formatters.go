@@ -24,16 +24,18 @@ func formatUser(user usersservice.User) ([]byte, error) {
 	}
 
 	return json.MarshalIndent(_User{
-		IDToken:     user.GetIDToken(),
-		AccessToken: user.GetAccessToken(),
-		Profile:     _profile,
+		IDToken:      user.GetIDToken(),
+		AccessToken:  user.GetAccessToken(),
+		RefreshToken: user.GetRefreshToken(),
+		Profile:      _profile,
 	}, "", "  ")
 }
 
 type _User struct {
-	IDToken     string    `json:"id_token"`
-	AccessToken string    `json:"access_token"`
-	Profile     *_Profile `json:"profile"`
+	IDToken      string    `json:"id_token"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
+	Profile      *_Profile `json:"profile"`
 }
 
 type _Profile struct {

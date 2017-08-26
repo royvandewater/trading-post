@@ -18,6 +18,9 @@ type User interface {
 	// GetProfile returns the user profile
 	GetProfile() Profile
 
+	// GetRefreshToken returns the user's refresh token
+	GetRefreshToken() string
+
 	// JSON serializes the user record
 	JSON() ([]byte, error)
 }
@@ -47,9 +50,10 @@ type Stock interface {
 }
 
 type _User struct {
-	IDToken     string    `json:"id_token"`
-	AccessToken string    `json:"access_token"`
-	Profile     *_Profile `json:"profile"`
+	IDToken      string    `json:"id_token"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
+	Profile      *_Profile `json:"profile"`
 }
 
 func (u *_User) GetAccessToken() string {
@@ -62,6 +66,10 @@ func (u *_User) GetIDToken() string {
 
 func (u *_User) GetProfile() Profile {
 	return u.Profile
+}
+
+func (u *_User) GetRefreshToken() string {
+	return u.RefreshToken
 }
 
 func (u *_User) JSON() ([]byte, error) {
