@@ -5,8 +5,9 @@ services:
     env_file: './config/trading-post.env'
     deploy:
       replicas: 2
-      limits:
-        memory: 10M
+      resources:
+        limits:
+          memory: 10M
       labels:
         - traefik.docker.network=trading-post
         - traefik.frontend.rule=Host:trading-post.club
@@ -17,8 +18,9 @@ services:
   mongo:
     image: mongo
     deploy:
-      limits:
-        memory: 100M
+      resources:
+        limits:
+          memory: 100M
     volumes:
       - ./config/mongo-data:/data/db
     networks:
@@ -26,8 +28,9 @@ services:
   traefik:
     image: traefik
     deploy:
-      limits:
-        memory: 30M
+      resources:
+        limits:
+          memory: 30M
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml
