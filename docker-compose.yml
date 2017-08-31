@@ -1,10 +1,12 @@
 version: '3'
 services:
   application:
-    image: royvandewater/trading-post:v6.0.0
+    image: royvandewater/trading-post:v6.2.0
     env_file: './config/trading-post.env'
     deploy:
       replicas: 2
+      limits:
+        memory: 10M
       labels:
         - traefik.docker.network=trading-post
         - traefik.frontend.rule=Host:trading-post.club
@@ -14,12 +16,18 @@ services:
       - trading-post
   mongo:
     image: mongo
+    deploy:
+      limits:
+        memory: 100M
     volumes:
       - ./config/mongo-data:/data/db
     networks:
       - trading-post
   traefik:
     image: traefik
+    deploy:
+      limits:
+        memory: 30M
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml
