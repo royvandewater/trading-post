@@ -11,23 +11,17 @@
   embedded area
 </div>
 
-<script src="https://cdn.auth0.com/js/lock/10.14/lock.min.js"></script>
+<script src="https://cdn.auth0.com/js/auth0/8.8/auth0.min.js"></script>
 <script>
-  var protocol = window.location.protocol;
-  var host = window.location.host;
-  var redirectUrl = protocol + '//' + host + '/callback'
-
-  var lock = new Auth0Lock('qHuHbvyFn0LRXxFMiCHKpMSIEVCchYNd', 'trading-post.auth0.com', {
-    container: 'root',
-    auth: {
-      redirectUrl: redirectUrl,
-      responseType: 'code',
-      params: {
-        scope: 'openid email' // Learn about scopes: https://auth0.com/docs/scopes
-      }
-    }
-  });
-  lock.show();
+  var webAuth = new auth0.WebAuth({
+    domain: 'trading-post.auth0.com',
+    clientID: 'qHuHbvyFn0LRXxFMiCHKpMSIEVCchYNd',
+    redirectUri: 'http://localhost:3000/callback',
+    audience: 'https://trading-post.club',
+    responseType: 'code',
+    scope: 'openid profile offline_access',
+  })
+  webAuth.authorize()
 </script>
 </body>
 </html>

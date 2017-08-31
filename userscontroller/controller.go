@@ -22,6 +22,17 @@ type UsersController interface {
 	// id_token should be used as the a "Authorization Bearer" token
 	// for example: `curl -H 'Authorization: Bearer <id_token>' http://...`
 	Login(rw http.ResponseWriter, r *http.Request)
+
+	// Token returns a user object, along with a nested profile. The
+	// refresh_token should be in the POST body with a grant_type of refresh_token
+	// for example:
+	// ```
+	// curl \
+	//   -H 'Content-Type: application/json' \
+	//   -d '{"grant_type": "refresh_token", "refresh_token": "<token>"}' \
+	//   http://...`
+	//
+	Token(rw http.ResponseWriter, r *http.Request)
 }
 
 // New constructs a new UsersController instance
@@ -66,6 +77,36 @@ func (c *_Controller) Login(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(statusCode)
+	rw.Write(userJSON)
+}
+
+func (c *_Controller) Token(rw http.ResponseWriter, r *http.Request) {
+	tokenBody, err := parseTokenBody(r.Body)
+	if err != nil {
+		http.Error(rw, err.Error(), 400)
+		return
+	}
+
+	err = validateTokenBody(tokenBody)
+	if err != nil {
+		http.Error(rw, err.Error(), 422)
+		return
+	}
+
+	user, err := c.usersService.RefreshToken(tokenBody.RefreshToken)
+	if err != nil {
+		http.Error(rw, err.Error(), 500)
+		return
+	}
+
+	userJSON, err := formatUser(user)
+	if err != nil {
+		http.Error(rw, fmt.Sprintf("Failed to generate JSON response: %v", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(201)
 	rw.Write(userJSON)
 }
 

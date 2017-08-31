@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/royvandewater/trading-post/auth0creds"
+	"github.com/royvandewater/trading-post/oauthrefresh"
 	"golang.org/x/oauth2"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -22,6 +24,11 @@ type UsersService interface {
 	// and then upserts the user profile into persistent
 	// storage
 	Login(code string) (User, int, error)
+
+	// RefreshToken exchanges the refresh token for a user profile
+	// and then upserts the user profile into persistent
+	// storage
+	RefreshToken(refreshToken string) (User, error)
 
 	// UpdateForBuyOrderByUserID removes riches from the user and adds
 	// to the stock quantity for the given ticker. Will
@@ -46,7 +53,7 @@ func New(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) UsersService {
 		ClientID:     auth0Creds.ClientID,
 		ClientSecret: auth0Creds.ClientSecret,
 		RedirectURL:  auth0Creds.CallbackURL,
-		Scopes:       []string{"openid", "profile"},
+		Scopes:       []string{"openid", "profile", "offline_access"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("https://%v/authorize", auth0Creds.Domain),
 			TokenURL: fmt.Sprintf("https://%v/oauth/token", auth0Creds.Domain),
@@ -85,6 +92,8 @@ func (s *_Service) Login(code string) (User, int, error) {
 		return nil, http.StatusInternalServerError, err
 	}
 
+	fmt.Println(token)
+
 	user := _User{
 		IDToken:      token.Extra("id_token").(string),
 		AccessToken:  token.AccessToken,
@@ -92,6 +101,32 @@ func (s *_Service) Login(code string) (User, int, error) {
 		Profile:      profile,
 	}
 	return &user, 200, nil
+}
+
+func (s *_Service) RefreshToken(refreshToken string) (User, error) {
+	token, err := oauthrefresh.Refresh(refreshToken, s.conf.ClientID, s.conf.ClientSecret, s.conf.Endpoint.TokenURL)
+	if err != nil {
+		return nil, err
+	}
+
+	oauth2Token := &oauth2.Token{
+		AccessToken:  token.AccessToken,
+		Expiry:       time.Now().Add(time.Duration(token.ExpiresIn) * time.Second),
+		RefreshToken: token.RefreshToken,
+		TokenType:    token.TokenType,
+	}
+	profile, err := s.findOrCreateProfile(oauth2Token)
+	if err != nil {
+		return nil, err
+	}
+
+	user := _User{
+		IDToken:      token.IDToken,
+		AccessToken:  token.AccessToken,
+		RefreshToken: refreshToken,
+		Profile:      profile,
+	}
+	return &user, nil
 }
 
 func (s *_Service) UpdateForBuyOrderByUserID(userID, ticker string, quantity, price int) error {
