@@ -39,7 +39,7 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 
 	router := mux.NewRouter()
 	router.Methods("GET").Path("/callback").HandlerFunc(usersController.Login)
-	router.Methods("POST").Path("/token").HandlerFunc(usersController.Token)
+	router.Methods("POST").Path("/tokens").HandlerFunc(usersController.Token)
 	router.PathPrefix("/profile").Handler(negroni.New(
 		negroni.HandlerFunc(usersController.Authenticate),
 		negroni.Wrap(profileRouter),

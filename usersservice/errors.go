@@ -1,4 +1,4 @@
-package jwt
+package usersservice
 
 import (
 	"errors"
@@ -23,11 +23,11 @@ const (
 	ValidationErrorIssuedAt      // IAT validation failed
 	ValidationErrorIssuer        // ISS validation failed
 	ValidationErrorNotValidYet   // NBF validation failed
-	ValidationErrorID            // JTI validation failed
+	ValidationErrorId            // JTI validation failed
 	ValidationErrorClaimsInvalid // Generic claims validation error
 )
 
-// NewValidationError is a helper for constructing a ValidationError with a string error message
+// Helper for constructing a ValidationError with a string error message
 func NewValidationError(errorText string, errorFlags uint32) *ValidationError {
 	return &ValidationError{
 		text:   errorText,
@@ -35,7 +35,7 @@ func NewValidationError(errorText string, errorFlags uint32) *ValidationError {
 	}
 }
 
-// ValidationError is the error from Parse if token is not valid
+// The error from Parse if token is not valid
 type ValidationError struct {
 	Inner  error  // stores the error returned by external dependencies, i.e.: KeyFunc
 	Errors uint32 // bitfield.  see ValidationError... constants

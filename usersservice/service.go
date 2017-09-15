@@ -10,6 +10,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/royvandewater/trading-post/auth0creds"
 	"github.com/royvandewater/trading-post/oauthrefresh"
+	"github.com/royvandewater/trading-post/publickey"
 	"golang.org/x/oauth2"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -60,13 +61,14 @@ func New(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) UsersService {
 		},
 	}
 
-	return &_Service{auth0Creds: auth0Creds, conf: conf, profiles: profiles}
+	return &_Service{auth0Creds: auth0Creds, auth0Domain: auth0Creds.Domain, conf: conf, profiles: profiles}
 }
 
 type _Service struct {
-	auth0Creds auth0creds.Auth0Creds
-	conf       *oauth2.Config
-	profiles   *mgo.Collection
+	auth0Creds  auth0creds.Auth0Creds
+	auth0Domain string
+	conf        *oauth2.Config
+	profiles    *mgo.Collection
 }
 
 func (s *_Service) GetProfile(userID string) (Profile, error) {
@@ -91,8 +93,6 @@ func (s *_Service) Login(code string) (User, int, error) {
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
-
-	fmt.Println(token)
 
 	user := _User{
 		IDToken:      token.Extra("id_token").(string),
@@ -164,35 +164,34 @@ func (s *_Service) UpdateForSellOrderByUserID(userID, ticker string, quantity, a
 }
 
 func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
-	claims := &_ProfileClaims{}
+	claims := &StandardClaims{}
 
 	token, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(s.auth0Creds.ClientSecret), nil
+		kid := token.Header["kid"].(string)
+		key, err := publickey.FromDomain(s.auth0Domain, kid)
+		if err != nil {
+			return nil, err
+		}
+
+		return key, nil
 	})
 
 	if token.Valid {
-		return claims.UserID, nil
+		return claims.Subject, nil
 	}
 	if validationErr, ok := err.(*jwt.ValidationError); ok {
 		// if jwt.ValidationErrorExpired is the only error, return
 		if validationErr.Errors&^jwt.ValidationErrorExpired == 0 {
-			return claims.UserID, nil
+			return claims.Subject, nil
 		}
 		return "", err
 	}
 
 	return "", err
-
-	// token := &oauth2.Token{AccessToken: accessToken}
-	// _, err = s.findOrCreateProfile(token)
-	// if err != nil {
-	// 	return "", err
-	// }
-	//
 }
 
 func (s *_Service) ensureTickerIsPresent(userID, ticker string) error {
@@ -249,10 +248,4 @@ func (s *_Service) getProfileForToken(token *oauth2.Token) (*_Profile, error) {
 	}
 
 	return &profile, nil
-}
-
-type _ProfileClaims struct {
-	jwt.StandardClaims
-
-	UserID string `json:"sub"`
 }

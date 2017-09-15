@@ -126,6 +126,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/lestrrat/go-jwx",
+			"repository": "https://github.com/lestrrat/go-jwx",
+			"vcs": "git",
+			"revision": "10335d0ed76ac4161f6015f9e1a4e06a1ea3a795",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/martini-contrib/render",
 			"repository": "https://github.com/martini-contrib/render",
 			"vcs": "git",
@@ -138,6 +146,14 @@
 			"repository": "https://github.com/oxtoacart/bpool",
 			"vcs": "git",
 			"revision": "4e1c5567d7c2dd59fa4c7c83d34c2f3528b025d6",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/pkg/errors",
+			"repository": "https://github.com/pkg/errors",
+			"vcs": "git",
+			"revision": "2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb",
 			"branch": "master",
 			"notests": true
 		},
