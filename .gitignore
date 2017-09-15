@@ -33,3 +33,4 @@ config/mongo-data/*
 config/letsencrypt/*
 config/traefik/*
 run.sh
+config/trading-post.env
