@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// For a type to be a Claims object, it must just have a Valid method that determines
+// Claims objects must justhave a Valid method that determines
 // if the token is invalid for any supported reason
 type Claims interface {
 	Valid() error

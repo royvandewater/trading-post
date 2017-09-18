@@ -183,13 +183,6 @@ func (s *_Service) UserIDForAccessToken(accessToken string) (string, error) {
 	if token.Valid {
 		return claims.Subject, nil
 	}
-	if validationErr, ok := err.(*jwt.ValidationError); ok {
-		// if jwt.ValidationErrorExpired is the only error, return
-		if validationErr.Errors&^jwt.ValidationErrorExpired == 0 {
-			return claims.Subject, nil
-		}
-		return "", err
-	}
 
 	return "", err
 }
@@ -210,6 +203,10 @@ func (s *_Service) findOrCreateProfile(token *oauth2.Token) (*_Profile, error) {
 	profile, err := s.getProfileForToken(token)
 	if err != nil {
 		return profile, err
+	}
+
+	if profile.UserID == "" && profile.Subject != "" {
+		profile.UserID = profile.Subject
 	}
 
 	err = s.profiles.Find(bson.M{"user_id": profile.UserID}).One(&profile)

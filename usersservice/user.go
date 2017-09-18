@@ -77,10 +77,11 @@ func (u *_User) JSON() ([]byte, error) {
 }
 
 type _Profile struct {
-	UserID string    `bson:"user_id" json:"user_id"`
-	Name   string    `bson:"name" json:"name"`
-	Riches int       `bson:"riches,omitempty" json:"riches,omitempty"`
-	Stocks []*_Stock `bson:"stocks"`
+	UserID  string    `bson:"user_id" json:"user_id"`
+	Subject string    `json:"sub"`
+	Name    string    `bson:"name" json:"name"`
+	Riches  int       `bson:"riches,omitempty" json:"riches,omitempty"`
+	Stocks  []*_Stock `bson:"stocks"`
 }
 
 func (p *_Profile) GetName() string {
