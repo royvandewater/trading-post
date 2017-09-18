@@ -18,6 +18,10 @@ type UsersController interface {
 	// `user := usercontext.FromContext(r.Context())`
 	Authenticate(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 
+	// List returns a list of the top ten users, ranked by
+	// their riches.
+	List(rw http.ResponseWriter, r *http.Request)
+
 	// Login returns a user object, along with a nested profile. The
 	// id_token should be used as the a "Authorization Bearer" token
 	// for example: `curl -H 'Authorization: Bearer <id_token>' http://...`
@@ -36,12 +40,12 @@ type UsersController interface {
 }
 
 // New constructs a new UsersController instance
-func New(usersService usersservice.UsersService) UsersController {
-	return &_Controller{usersService: usersService}
+func New(service usersservice.UsersService) UsersController {
+	return &_Controller{service: service}
 }
 
 type _Controller struct {
-	usersService usersservice.UsersService
+	service usersservice.UsersService
 }
 
 func (c *_Controller) Authenticate(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
@@ -51,7 +55,7 @@ func (c *_Controller) Authenticate(rw http.ResponseWriter, r *http.Request, next
 		return
 	}
 
-	userID, err := c.usersService.UserIDForAccessToken(accessToken)
+	userID, err := c.service.UserIDForAccessToken(accessToken)
 	if err != nil {
 		http.Error(rw, fmt.Sprintf("Could not verify Authorization Bearer token: %v", err.Error()), 401)
 		return
@@ -60,10 +64,27 @@ func (c *_Controller) Authenticate(rw http.ResponseWriter, r *http.Request, next
 	next(rw, r.WithContext(usercontext.NewContext(r.Context(), &usercontext.User{ID: userID})))
 }
 
+func (c *_Controller) List(rw http.ResponseWriter, r *http.Request) {
+	topProfiles, err := c.service.ListTopProfiles()
+	if err != nil {
+		http.Error(rw, fmt.Sprintf("Failed to retrieve top profiles: %v", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	response, err := formatTopProfiles(topProfiles)
+	if err != nil {
+		http.Error(rw, fmt.Sprintf("Failed to generate response: %v", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	rw.Write(response)
+}
+
 func (c *_Controller) Login(rw http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 
-	user, statusCode, err := c.usersService.Login(code)
+	user, statusCode, err := c.service.Login(code)
 	if err != nil {
 		http.Error(rw, err.Error(), statusCode)
 		return
@@ -93,7 +114,7 @@ func (c *_Controller) Token(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.usersService.RefreshToken(tokenBody.RefreshToken)
+	user, err := c.service.RefreshToken(tokenBody.RefreshToken)
 	if err != nil {
 		http.Error(rw, err.Error(), 500)
 		return

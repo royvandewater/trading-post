@@ -31,6 +31,19 @@ func formatUser(user usersservice.User) ([]byte, error) {
 	}, "", "  ")
 }
 
+func formatTopProfiles(profiles []usersservice.Profile) ([]byte, error) {
+	topProfiles := make([]*_TopProfile, len(profiles))
+
+	for i, profile := range profiles {
+		topProfiles[i] = &_TopProfile{
+			Name:   profile.GetName(),
+			Riches: float64(profile.GetRiches()) / 1000,
+		}
+	}
+
+	return json.MarshalIndent(_TopProfiles{Profiles: topProfiles}, "", "  ")
+}
+
 type _User struct {
 	IDToken      string    `json:"id_token"`
 	AccessToken  string    `json:"access_token"`
@@ -48,4 +61,13 @@ type _Profile struct {
 type _Stock struct {
 	Quantity int    `json:"quantity"`
 	Ticker   string `json:"ticker"`
+}
+
+type _TopProfile struct {
+	Name   string  `json:"name"`
+	Riches float64 `json:"riches"`
+}
+
+type _TopProfiles struct {
+	Profiles []*_TopProfile `json:"profiles"`
 }

@@ -21,6 +21,10 @@ type UsersService interface {
 	// GetProfile retrieves a profile for a userID
 	GetProfile(userID string) (Profile, error)
 
+	// ListTopProfiles returns the top 10 profiles based
+	// on current riches
+	ListTopProfiles() ([]Profile, error)
+
 	// Login exchanges the code for a user profile
 	// and then upserts the user profile into persistent
 	// storage
@@ -80,6 +84,30 @@ func (s *_Service) GetProfile(userID string) (Profile, error) {
 	}
 
 	return profile, nil
+}
+
+// ListTopProfiles returns the top 10 profiles based
+// on current riches
+func (s *_Service) ListTopProfiles() ([]Profile, error) {
+	var _profiles []*_Profile
+
+	err := s.profiles.
+		Find(bson.M{}).
+		Select(bson.M{"name": 1, "riches": 1}).
+		Sort("-riches").
+		Limit(10).
+		All(&_profiles)
+
+	if err != nil {
+		return nil, err
+	}
+
+	profiles := make([]Profile, len(_profiles))
+	for i, _profile := range _profiles {
+		profiles[i] = _profile
+	}
+
+	return profiles, nil
 }
 
 // Login finds or creates a user in the database
