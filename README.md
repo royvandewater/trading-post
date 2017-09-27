@@ -1,7 +1,11 @@
 # trading-post
 Store stock trading transactions with funny money
 
+
+
 A hosted version of this can be found at [https://trading-post.club](https://trading-post.club).
+
+[![Codefresh build status]( https://g.codefresh.io/api/badges/build?repoOwner=royvandewater&repoName=trading-post&branch=master&pipelineName=trading-post&accountName=royvandewater&type=cf-2)]( https://g.codefresh.io/repositories/royvandewater/trading-post/builds?filter=trigger:build;branch:master;service:5904f9a464e01000011b6328~trading-post)
 
 ## API
 
