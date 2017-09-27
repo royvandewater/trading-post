@@ -37,6 +37,9 @@ type Profile interface {
 
 	// GetStocks returns the profile's stocks
 	GetStocks() []Stock
+
+	// GetUserID returns the profile's ID in the system
+	GetUserID() string
 }
 
 // Stock represents the quantity of stock
@@ -77,11 +80,10 @@ func (u *_User) JSON() ([]byte, error) {
 }
 
 type _Profile struct {
-	UserID  string    `bson:"user_id" json:"user_id"`
-	Subject string    `json:"sub"`
-	Name    string    `bson:"name" json:"name"`
-	Riches  int       `bson:"riches,omitempty" json:"riches,omitempty"`
-	Stocks  []*_Stock `bson:"stocks"`
+	UserID string    `bson:"user_id" json:"sub"`
+	Name   string    `bson:"name" json:"name"`
+	Riches int       `bson:"riches,omitempty" json:"riches,omitempty"`
+	Stocks []*_Stock `bson:"stocks"`
 }
 
 func (p *_Profile) GetName() string {
@@ -100,6 +102,10 @@ func (p *_Profile) GetStocks() []Stock {
 	}
 
 	return stocks
+}
+
+func (p *_Profile) GetUserID() string {
+	return p.UserID
 }
 
 type _Stock struct {

@@ -21,6 +21,7 @@ func formatUser(user usersservice.User) ([]byte, error) {
 		Name:   profile.GetName(),
 		Riches: float64(profile.GetRiches()) / 1000,
 		Stocks: _stocks,
+		UserID: profile.GetUserID(),
 	}
 
 	return json.MarshalIndent(_User{
