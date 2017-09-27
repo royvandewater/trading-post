@@ -264,7 +264,6 @@ func (s *_Service) getProfileForToken(token *oauth2.Token) (*_Profile, error) {
 		return nil, err
 	}
 
-	fmt.Println("response:", string(raw))
 	if err = json.Unmarshal(raw, &profile); err != nil {
 		return nil, err
 	}

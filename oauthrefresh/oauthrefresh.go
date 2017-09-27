@@ -3,7 +3,6 @@ package oauthrefresh
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -37,8 +36,6 @@ func Refresh(refreshToken, clientID, clientSecret, tokenURL string) (*Token, err
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("bodyBytes", string(bodyBytes))
 
 	token := &Token{}
 	err = json.Unmarshal(bodyBytes, token)
