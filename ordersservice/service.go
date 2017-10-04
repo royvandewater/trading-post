@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/royvandewater/trading-post/usersservice"
@@ -161,7 +162,7 @@ func (s *_Service) ListSellOrders(userID string) ([]SellOrder, error) {
 }
 
 func stockPrice(ticker string) (int, error) {
-	url := fmt.Sprintf("https://stock.octoblu.com/last-trade-price/%v", ticker)
+	url := fmt.Sprintf("https://query2.finance.yahoo.com/v10/finance/quoteSummary/%v?modules=summaryDetail", ticker)
 	response, err := http.Get(url)
 
 	if err != nil {
@@ -169,7 +170,7 @@ func stockPrice(ticker string) (int, error) {
 	}
 
 	if response.StatusCode != 200 {
-		return 0, fmt.Errorf("Non 200 status code received from weather.octoblu.com: %v", response.StatusCode)
+		return 0, fmt.Errorf("Non 200 status code received from finance.yahoo.com: %v", response.StatusCode)
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
@@ -178,7 +179,15 @@ func stockPrice(ticker string) (int, error) {
 	}
 
 	stockResponse := struct {
-		Price float64 `json:"price"`
+		QuoteSummary struct {
+			Result []struct {
+				SummaryDetail struct {
+					Bid struct {
+						Fmt string `json:"fmt"`
+					} `json:"bid"`
+				} `json:"summaryDetail"`
+			} `json:"result"`
+		} `json:"quoteSummary"`
 	}{}
 
 	err = json.Unmarshal(data, &stockResponse)
@@ -186,5 +195,15 @@ func stockPrice(ticker string) (int, error) {
 		return 0, err
 	}
 
-	return int(stockResponse.Price * 1000), nil
+	if len(stockResponse.QuoteSummary.Result) < 1 {
+		return 0, fmt.Errorf("Received less than one result")
+	}
+
+	priceStr := stockResponse.QuoteSummary.Result[0].SummaryDetail.Bid.Fmt
+	price, err := strconv.ParseFloat(priceStr, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(price * 1000), nil
 }
