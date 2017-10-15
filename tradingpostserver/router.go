@@ -17,6 +17,12 @@ import (
 	"github.com/urfave/negroni"
 )
 
+func healthcheck(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte("{\"online\": true}"))
+}
+
 func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Handler {
 	usersService := usersservice.New(auth0Creds, mongoDB)
 	ordersService := ordersservice.New(mongoDB, usersService)
@@ -45,6 +51,7 @@ func newRouter(auth0Creds auth0creds.Auth0Creds, mongoDB *mgo.Session) http.Hand
 		negroni.HandlerFunc(usersController.Authenticate),
 		negroni.Wrap(profileRouter),
 	))
+	router.Methods("GET").Path("/healthcheck").HandlerFunc(healthcheck)
 	router.Methods("GET").Handler(http.FileServer(http.Dir("html/")))
 
 	allowCORS := cors.New(cors.Options{
