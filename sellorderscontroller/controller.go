@@ -53,6 +53,7 @@ func (controller *_Controller) Create(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(201)
 	rw.Write(response)
 }
@@ -73,6 +74,7 @@ func (controller *_Controller) Get(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusOK)
 	rw.Write(response)
 }
@@ -92,6 +94,7 @@ func (controller *_Controller) List(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusOK)
 	rw.Write(response)
 }
