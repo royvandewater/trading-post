@@ -161,6 +161,10 @@ func (s *_Service) ListSellOrders(userID string) ([]SellOrder, error) {
 	return orders, nil
 }
 
+func stripCommas(str string) string {
+  return strings.Replace(str, ",", "", -1)
+}
+
 func stockPrice(ticker string) (int, error) {
 	url := fmt.Sprintf("https://query2.finance.yahoo.com/v10/finance/quoteSummary/%v?modules=summaryDetail", ticker)
 	response, err := http.Get(url)
@@ -200,7 +204,7 @@ func stockPrice(ticker string) (int, error) {
 	}
 
 	priceStr := stockResponse.QuoteSummary.Result[0].SummaryDetail.Bid.Fmt
-	price, err := strconv.ParseFloat(priceStr, 64)
+	price, err := strconv.ParseFloat(stripCommas(priceStr), 64)
 	if err != nil {
 		return 0, err
 	}
